@@ -13,3 +13,4 @@ bettercmath-test-*
 *.o
 *.obj
 *.lst
+libbettercmath.*

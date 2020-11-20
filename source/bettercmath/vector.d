@@ -1,3 +1,5 @@
+module bettercmath.vector;
+
 import std.math;
 
 @safe @nogc pure nothrow:
@@ -6,6 +8,7 @@ import std.math;
  + TODO: doc
  +/
 struct Vector(T, uint N)
+if (N > 0)
 {
     private alias Self = typeof(this);
 
@@ -68,11 +71,11 @@ struct Vector(T, uint N)
         alias tpq = yzw;
     }
 
-    this(T scalar)
+    this(const T scalar)
     {
         elements = scalar;
     }
-    this(T[N] values)
+    this(const T[N] values)
     {
         elements = values;
     }
@@ -108,25 +111,32 @@ struct Vector(T, uint N)
         return result;
     }
 
-    Self opBinary(string op)(immutable T scalar) const
+    Self opBinary(string op)(const T scalar) const
     {
         Self result;
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
         return result;
     }
-    Self opBinary(string op)(immutable Self other) const
+    Self opBinary(string op)(const Self other) const
     {
         Self result;
         mixin(q{result = elements[]} ~ op ~ q{other.elements[];});
         return result;
     }
+    Vector!(T, N + 1) opBinary(string op : "~")(const T scalar) const
+    {
+        typeof(return) result;
+        result[0 .. N] = elements[];
+        result[N] = scalar;
+        return result;
+    }
 
-    Self opOpAssign(string op)(immutable T scalar)
+    Self opOpAssign(string op)(const T scalar)
     {
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
         return this;
     }
-    Self opOpAssign(string op)(immutable Self other)
+    Self opOpAssign(string op)(const Self other)
     {
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;
