@@ -5,18 +5,20 @@ import std.math;
 /++
  + TODO: doc
  +/
-struct Vector(T, int N)
+struct Vector(T, uint N)
 {
+    private alias Self = typeof(this);
+
     /// Element holder
     T[N] elements = 0;
     alias elements this;
 
-    ref inout(T) get_(int i)() inout
+    private ref inout(T) get_(int i)() inout
     in(i >= 0 && i <= N, "Index out of bounds")
     {
         return elements[i];
     }
-    ref inout(T[to - from]) get_(int from, int to)() inout
+    private ref inout(T[to - from]) get_(int from, int to)() inout
     in(from >= 0 && to <= N, "Index out of bounds")
     {
         return elements[from .. to];
@@ -66,6 +68,28 @@ struct Vector(T, int N)
         alias tpq = yzw;
     }
 
+    this(T scalar)
+    {
+        elements = scalar;
+    }
+    this(T[N] values)
+    {
+        elements = values;
+    }
+
+    static Self zeros()
+    {
+        Self result = 0;
+        return result;
+    }
+    alias zeroes = zeros;
+
+    static Self ones()
+    {
+        Self result = 1;
+        return result;
+    }
+
     unittest
     {
         alias Vec4 = Vector!(float, 4);
@@ -77,8 +101,6 @@ struct Vector(T, int N)
     }
 
     // Operators
-    private alias Self = typeof(this);
-
     Self opUnary(string op)() const
     {
         Self result;
