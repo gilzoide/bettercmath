@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/bettercmath
+bettercmath.so
+bettercmath.dylib
+bettercmath.dll
+bettercmath.a
+bettercmath.lib
+bettercmath-test-*
+*.exe
+*.o
+*.obj
+*.lst

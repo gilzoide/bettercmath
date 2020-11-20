@@ -1,0 +1,8 @@
+{
+	"authors": [
+		"gilzoide"
+	],
+	"description": "3D math library compatible with betterC",
+	"license": "public license",
+	"name": "bettercmath"
+}
