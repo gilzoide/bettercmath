@@ -16,57 +16,65 @@ if (N > 0)
     T[N] elements = 0;
     alias elements this;
 
-    private ref inout(T) get_(int i)() inout
-    in(i >= 0 && i <= N, "Index out of bounds")
+    private ref inout(T) _get(int i)() inout
+    in
+    {
+        assert(i >= 0 && i <= N, "Index out of bounds");
+    }
+    do
     {
         return elements[i];
     }
-    private ref inout(T[to - from]) get_(int from, int to)() inout
-    in(from >= 0 && to <= N, "Index out of bounds")
+    private ref inout(T[to - from]) _slice(int from, int to)() inout
+    in
+    {
+        assert(from >= 0 && to <= N, "Index out of bounds");
+    }
+    do
     {
         return elements[from .. to];
     }
 
-    alias x = get_!(0);
+    alias x = _get!(0);
     alias r = x;
     alias u = x;
     alias s = x;
 
-    alias y = get_!(1);
+    alias y = _get!(1);
     alias g = y;
     alias v = y;
     alias t = y;
 
     static if (N > 2)
     {
-        alias z = get_!(2);
+        alias z = _get!(2);
         alias b = z;
         alias p = z;
 
-        alias xy = get_!(0, 2);
+        alias xy = _slice!(0, 2);
         alias rg = xy;
         alias uv = xy;
         alias st = xy;
 
-        alias yz = get_!(1, 3);
+        alias yz = _slice!(1, 3);
         alias gb = yz;
         alias tp = yz;
     }
     static if (N > 3)
     {
-        alias w = get_!(3);
+        alias w = _get!(3);
         alias a = w;
         alias q = w;
 
-        alias zw = get_!(2, 4);
+        alias zw = _slice!(2, 4);
         alias ba = zw;
         alias pq = zw;
 
-        alias xyz = get_!(0, 3);
+        alias xyz = _slice!(0, 3);
         alias rgb = xyz;
         alias stp = xyz;
 
-        alias yzw = get_!(1, 4);
+        alias yzw = _slice!(1, 4);
         alias gba = yzw;
         alias tpq = yzw;
     }
@@ -74,6 +82,11 @@ if (N > 0)
     this(const T scalar)
     {
         elements = scalar;
+    }
+    this(Args...)(const Args args)
+    if (args.length == N)
+    {
+        elements = [args];
     }
     this(const T[N] values)
     {
@@ -128,6 +141,13 @@ if (N > 0)
         typeof(return) result;
         result[0 .. N] = elements[];
         result[N] = scalar;
+        return result;
+    }
+    Vector!(T, N + 1) opRightBinary(string op : "~")(const T scalar) const
+    {
+        typeof(return) result;
+        result[0] = scalar;
+        result[1 .. N = 1] = elements[];
         return result;
     }
 
