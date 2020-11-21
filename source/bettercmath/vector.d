@@ -106,16 +106,6 @@ if (N > 0)
         return result;
     }
 
-    unittest
-    {
-        alias Vec4 = Vector!(float, 4);
-        Vec4 a = {[1, 2, 3, 4]};
-        Vec4 b = {[1, 2, 3, 4]};
-        assert(a == b);
-        assert(a.elements == b.elements);
-        assert(a.xy == b.xy);
-    }
-
     // Operators
     Self opUnary(string op)() const
     {
@@ -161,19 +151,29 @@ if (N > 0)
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;
     }
+}
 
-    unittest
-    {
-        alias Vec4 = Vector!(float, 4);
-        Vec4 a = {[1, 2, 3, 4]};
-        assert(a + a - a == a);
-        immutable Vec4 b = {[2, 3, 4, 5]};
-        assert(a + 1 == b);
-        assert(b - 1 == a);
-        Vec4 c = {[-1, -2, -3, -4]};
-        assert(-a == c);
-        c = a += 1;
-        assert(a == b);
-        assert(a == c);
-    }
+unittest
+{
+    alias Vec4 = Vector!(float, 4);
+    Vec4 a = [1, 2, 3, 4];
+    Vec4 b = [1, 2, 3, 4];
+    assert(a == b);
+    assert(a.elements == b.elements);
+    assert(a.xy == b.xy);
+}
+
+unittest
+{
+    alias Vec4 = Vector!(float, 4);
+    Vec4 a = [1f, 2f, 3f, 4f];
+    assert(a + a - a == a);
+    immutable Vec4 b = [2, 3, 4, 5];
+    assert(a + 1 == b);
+    assert(b - 1 == a);
+    Vec4 c = [-1, -2, -3, -4];
+    assert(-a == c);
+    c = a += 1;
+    assert(a == b);
+    assert(a == c);
 }
