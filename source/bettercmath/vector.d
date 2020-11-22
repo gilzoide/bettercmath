@@ -1,6 +1,7 @@
 module bettercmath.vector;
 
 import core.stdc.math;
+import std.algorithm : among;
 
 @safe @nogc pure nothrow:
 
@@ -14,6 +15,7 @@ if (N > 1)
     version (unittest)
     {
         private alias Vec2 = Vector!(float, 2);
+        private alias Vec2i = Vector!(int, 2);
         private alias Vec3 = Vector!(float, 3);
         private alias Vec4 = Vector!(float, 4);
     }
@@ -121,6 +123,7 @@ if (N > 1)
 
     // Operators
     Self opUnary(string op)() const
+    if (op.among("-", "+", "~"))
     {
         Self result;
         mixin(q{result =} ~ op ~ q{elements[];});
@@ -132,6 +135,7 @@ if (N > 1)
     }
 
     Self opBinary(string op)(const T scalar) const
+    if (!op.among("~", "<<", ">>", ">>>"))
     {
         Self result;
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
@@ -140,9 +144,45 @@ if (N > 1)
     unittest
     {
         Vec2 a = [1, 2];
-        assert(a + 1 == [2, 3]);
+        assert(a + 1 == [1f + 1f, 2f + 1f]);
+        assert(a - 1 == [1f - 1f, 2f - 1f]);
+        assert(a * 2 == [1f * 2f, 2f * 2f]);
+        assert(a / 2 == [1f / 2f, 2f / 2f]);
+        assert(a % 2 == [1f % 2f, 2f % 2f]);
+        assert(a ^^ 2 == [1f ^^ 2f, 2f ^^ 2f]);
+
+        Vec2i b = [1, 2];
+        assert((b & 1) == [1 & 1, 2 & 1]);
+        assert((b | 1) == [1 | 1, 2 | 1]);
+        assert((b ^ 1) == [1 ^ 1, 2 ^ 1]);
     }
+    /// TODO: shift operations
+
+    Self opBinaryRight(string op)(const T scalar) const
+    if (!op.among("~", "<<", ">>", ">>>"))
+    {
+        Self result;
+        mixin(q{result = scalar} ~ op ~ q{elements[];});
+        return result;
+    }
+    unittest
+    {
+        Vec2 a = [1, 2];
+        assert(1 + a == [1f + 1f, 1f + 2f]);
+        assert(1 - a == [1f - 1f, 1f - 2f]);
+        assert(2 * a == [2f * 1f, 2f * 2f]);
+        assert(2 / a == [2f / 1f, 2f / 2f]);
+        assert(2 % a == [2f % 1f, 2f % 2f]);
+        assert(2 ^^ a == [2f ^^ 1f, 2f ^^ 2f]);
+
+        Vec2i b = [1, 2];
+        assert((1 & b) == [1 & 1, 1 & 2]);
+        assert((1 | b) == [1 | 1, 1 | 2]);
+        assert((1 ^ b) == [1 ^ 1, 1 ^ 2]);
+    }
+
     Self opBinary(string op)(const Self other) const
+    if (op != "~")
     {
         Self result;
         mixin(q{result = elements[]} ~ op ~ q{other.elements[];});
@@ -163,12 +203,46 @@ if (N > 1)
         result[N] = scalar;
         return result;
     }
-    Vector!(T, N + 1) opRightBinary(string op : "~")(const T scalar) const
+    unittest
+    {
+        Vec2 v = [1, 2];
+        assert(v ~ 3 == Vec3(1, 2, 3));
+    }
+    Vector!(T, N + 1) opBinaryRight(string op : "~")(const T scalar) const
     {
         typeof(return) result;
         result[0] = scalar;
-        result[1 .. N = 1] = elements[];
+        result[1 .. N + 1] = elements[];
         return result;
+    }
+    unittest
+    {
+        Vec2 v = [1, 2];
+        Vec3 v2 = 0f ~ v;
+        assert(0 ~ v == Vec3(0, 1, 2));
+    }
+
+    Vector!(T, N + M) opBinary(string op : "~", M)(T[M] other) const
+    {
+        typeof(return) result = elements ~ other;
+        return result;
+    }
+    unittest
+    {
+        Vec2 v1 = [1, 2];
+        assert(v1 ~ [3f, 4f] == Vec4(1, 2, 3, 4));
+        assert(v1 ~ Vec2(3f, 4f) == Vec4(1, 2, 3, 4));
+    }
+    Vector!(T, N + M) opBinaryRight(string op : "~", M)(T[M] other) const
+    {
+        typeof(return) result = other ~ elements;
+        return result;
+    }
+    unittest
+    {
+        Vec2 v1 = [1, 2];
+        assert([3f, 4f] ~ v1 == Vec4(3, 4, 1, 2));
+        assert(Vec2(3f, 4f) ~ v1 == Vec4(3, 4, 1, 2));
     }
 
     Self opOpAssign(string op)(const T scalar)
