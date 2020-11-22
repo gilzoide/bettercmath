@@ -1,7 +1,8 @@
 module bettercmath.matrix;
 
 import bettercmath.vector;
-import std.math;
+import core.stdc.math;
+import std.math : PI;
 import std.traits;
 
 struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
@@ -41,7 +42,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
             Self result;
 
-            immutable T cotangent = 1.0 / tan(fov * (PI / 360.0));
+            float cotangent = 1.0 / tanf(fov * (PI / 360.0));
 
             result.columns[0][0] = cotangent / aspectRatio;
             result.columns[1][1] = cotangent;
