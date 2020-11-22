@@ -4,5 +4,13 @@
 		"gilzoide"
 	],
 	"description": "3D math library compatible with betterC",
-	"license": "public license"
+	"license": "public license",
+	"configurations": [
+		{
+			"name": "betterC",
+			"buildOptions": [
+				"betterC"
+			]
+		}
+	]
 }
