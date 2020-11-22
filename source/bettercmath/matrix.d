@@ -9,11 +9,19 @@ struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
 if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 {
     private alias Self = typeof(this);
+    version (unittest)
+    {
+        private alias Mat4 = Matrix!(float, 4);
+    }
 
     enum numColumns = _numColumns;
     enum numRows = _numRows;
 
-    Vector!(T, numColumns)[numRows] columns;
+    union
+    {
+        Vector!(T, numColumns)[numRows] columns;
+        T[numColumns * numRows] elements;
+    }
     alias columns this;
 
     // Matrix 4x4 methods
@@ -42,7 +50,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
             Self result;
 
-            float cotangent = 1.0 / tanf(fov * (PI / 360.0));
+            T cotangent = 1.0 / tanf(fov * (PI / 360.0));
 
             result.columns[0][0] = cotangent / aspectRatio;
             result.columns[1][1] = cotangent;
@@ -54,9 +62,4 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             return result;
         }
     }
-}
-
-unittest
-{
-    alias Mat4 = Matrix!(float, 4);
 }
