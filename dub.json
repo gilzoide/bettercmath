@@ -7,6 +7,9 @@
 	"license": "public license",
 	"configurations": [
 		{
+			"name": "library"
+		},
+		{
 			"name": "betterC",
 			"buildOptions": [
 				"betterC"
