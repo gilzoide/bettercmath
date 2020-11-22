@@ -1,6 +1,6 @@
 module bettercmath.vector;
 
-import std.math;
+import core.stdc.math;
 
 @safe @nogc pure nothrow:
 
@@ -99,18 +99,11 @@ if (N > 1)
         elements[] = values[];
     }
 
-    static Self zeros()
-    {
-        Self result = 0;
-        return result;
-    }
+    /// Vector with all zeros
+    enum Self zeros = 0;
     alias zeroes = zeros;
-
-    static Self ones()
-    {
-        Self result = 1;
-        return result;
-    }
+    /// Vector with all ones
+    enum Self ones = 1;
 
     // Operators
     Self opUnary(string op)() const
@@ -157,29 +150,25 @@ if (N > 1)
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;
     }
-}
 
-unittest
-{
-    alias Vec4 = Vector!(float, 4);
-    Vec4 a = [1, 2, 3, 4];
-    Vec4 b = [1, 2, 3, 4];
-    assert(a == b);
-    assert(a.elements == b.elements);
-    assert(a.xy == b.xy);
-}
+    float magnitudeSquared()
+    {
+        import std.algorithm : sum;
+        Self squared = this * this;
+        return squared[].sum;
+    }
+    unittest
+    {
+        assert(Vec2(0, 0).magnitudeSquared() == 0);
+        assert(Vec2(1, 0).magnitudeSquared() == 1);
+        assert(Vec2(0, 1).magnitudeSquared() == 1);
+        assert(Vec2(1, 1).magnitudeSquared() == 2);
+        assert(Vec2(2, 0).magnitudeSquared() == 4);
+        assert(Vec2(1, 2).magnitudeSquared() == 5);
+    }
 
-unittest
-{
-    alias Vec4 = Vector!(float, 4);
-    Vec4 a = [1f, 2f, 3f, 4f];
-    assert(a + a - a == a);
-    immutable Vec4 b = [2, 3, 4, 5];
-    assert(a + 1 == b);
-    assert(b - 1 == a);
-    Vec4 c = [-1, -2, -3, -4];
-    assert(-a == c);
-    c = a += 1;
-    assert(a == b);
-    assert(a == c);
+    float magnitude()
+    {
+        return sqrtf(magnitudeSquared());
+    }
 }
