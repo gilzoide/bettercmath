@@ -85,15 +85,29 @@ if (N > 1)
         alias tpq = yzw;
     }
 
+    unittest
+    {
+        Vec2 v = [1, 2];
+        assert(v.x == 1);
+        assert(v.x == v[0]);
+        assert(v.y == 2);
+        assert(v.y == v[1]);
+        v.x = 2;
+        assert(v.r == 2);
+    }
+
+    /// Constructs a Vector with all elements equal to `scalar`
     this(const T scalar)
     {
         elements[] = scalar;
     }
+    /// Constructs a Vector with all elements initialized separetely
     this(Args...)(const Args args)
     if (args.length == N)
     {
         elements = [args];
     }
+    /// Constructs a Vector from static array.
     this(const T[N] values)
     {
         elements[] = values[];
@@ -112,6 +126,10 @@ if (N > 1)
         mixin(q{result =} ~ op ~ q{elements[];});
         return result;
     }
+    unittest
+    {
+        assert(-Vec2(1, -2) == [-1, 2]);
+    }
 
     Self opBinary(string op)(const T scalar) const
     {
@@ -119,12 +137,25 @@ if (N > 1)
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
         return result;
     }
+    unittest
+    {
+        Vec2 a = [1, 2];
+        assert(a + 1 == [2, 3]);
+    }
     Self opBinary(string op)(const Self other) const
     {
         Self result;
         mixin(q{result = elements[]} ~ op ~ q{other.elements[];});
         return result;
     }
+    unittest
+    {
+        assert(Vec2(1, 2) + Vec2(3, 4) == [1f+3f, 2f+4f]);
+        assert(Vec2(1, 2) - Vec2(3, 4) == [1f-3f, 2f-4f]);
+        assert(Vec2(1, 2) * Vec2(3, 4) == [1f*3f, 2f*4f]);
+        assert(Vec2(1, 2) / Vec2(3, 4) == [1f/3f, 2f/4f]);
+    }
+
     Vector!(T, N + 1) opBinary(string op : "~")(const T scalar) const
     {
         typeof(return) result;
