@@ -92,7 +92,7 @@ if (N > 1)
     this(Args...)(const Args args)
     if (args.length == N)
     {
-        elements[] = [args];
+        elements = [args];
     }
     this(const T[N] values)
     {
