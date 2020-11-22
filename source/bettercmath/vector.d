@@ -8,11 +8,17 @@ import std.math;
  + TODO: doc
  +/
 struct Vector(T, uint N)
-if (N > 0)
+if (N > 1)
 {
     private alias Self = typeof(this);
+    version (unittest)
+    {
+        private alias Vec2 = Vector!(float, 2);
+        private alias Vec3 = Vector!(float, 3);
+        private alias Vec4 = Vector!(float, 4);
+    }
 
-    /// Element holder
+    /// Element array.
     T[N] elements = 0;
     alias elements this;
 
@@ -81,16 +87,16 @@ if (N > 0)
 
     this(const T scalar)
     {
-        elements = scalar;
+        elements[] = scalar;
     }
     this(Args...)(const Args args)
     if (args.length == N)
     {
-        elements = [args];
+        elements[] = [args];
     }
     this(const T[N] values)
     {
-        elements = values;
+        elements[] = values[];
     }
 
     static Self zeros()
