@@ -1,9 +1,19 @@
 module bettercmath.vector;
 
 import bettercmath.cmath;
-import std.algorithm : among;
+import std.algorithm : among, sum;
+import std.traits : isFloatingPoint;
 
 @safe @nogc pure nothrow:
+
+version (unittest)
+{
+    private alias Vec2 = Vector!(float, 2);
+    private alias Vec2i = Vector!(int, 2);
+    private alias Vec3 = Vector!(float, 3);
+    private alias Vec4 = Vector!(float, 4);
+}
+
 
 /++
  + TODO: doc
@@ -12,13 +22,6 @@ struct Vector(T, uint N)
 if (N > 1)
 {
     private alias Self = typeof(this);
-    version (unittest)
-    {
-        private alias Vec2 = Vector!(float, 2);
-        private alias Vec2i = Vector!(int, 2);
-        private alias Vec3 = Vector!(float, 3);
-        private alias Vec4 = Vector!(float, 4);
-    }
 
     /// Element array.
     T[N] elements = 0;
@@ -256,27 +259,6 @@ if (N > 1)
         return this;
     }
 
-    T magnitudeSquared()
-    {
-        import std.algorithm : sum;
-        Self squared = this * this;
-        return squared[].sum;
-    }
-    unittest
-    {
-        assert(Vec2(0, 0).magnitudeSquared() == 0);
-        assert(Vec2(1, 0).magnitudeSquared() == 1);
-        assert(Vec2(0, 1).magnitudeSquared() == 1);
-        assert(Vec2(1, 1).magnitudeSquared() == 2);
-        assert(Vec2(2, 0).magnitudeSquared() == 4);
-        assert(Vec2(1, 2).magnitudeSquared() == 5);
-    }
-
-    T magnitude()
-    {
-        return sqrt!T(magnitudeSquared());
-    }
-
     unittest
     {
         assert(Vec2.sizeof == Vec2.elements.sizeof);
@@ -291,3 +273,31 @@ if (N > 1)
 /// True if `T` is some kind of Vector
 enum isVector(T) = is(T: Vector!U, U...);
 
+T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
+{
+    auto multiplied = a * b;
+    return multiplied[].sum;
+}
+
+T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
+{
+    return dot(vec, vec);
+}
+unittest
+{
+    assert(Vec2(0, 0).magnitudeSquared() == 0);
+    assert(Vec2(1, 0).magnitudeSquared() == 1);
+    assert(Vec2(0, 1).magnitudeSquared() == 1);
+    assert(Vec2(1, 1).magnitudeSquared() == 2);
+    assert(Vec2(2, 0).magnitudeSquared() == 4);
+    assert(Vec2(1, 2).magnitudeSquared() == 5);
+}
+
+template magnitude(T, uint N)
+{
+    private alias FT = FloatType!T;
+    FT magnitude(const Vector!(T, N) vec)
+    {
+        return sqrt!FT(vec.magnitudeSquared());
+    }
+}
