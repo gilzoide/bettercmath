@@ -5,24 +5,58 @@ import bettercmath.vector;
 import std.math : PI;
 import std.traits;
 
+version (unittest)
+{
+    private alias Mat4 = Matrix!(float, 4);
+}
+
 struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
 if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 {
     private alias Self = typeof(this);
-    version (unittest)
-    {
-        private alias Mat4 = Matrix!(float, 4);
-    }
 
     enum numColumns = _numColumns;
     enum numRows = _numRows;
+    alias RowVector = Vector!(T, numColumns);
+    alias ColumnVector = Vector!(T, numRows);
 
     union
     {
-        Vector!(T, numColumns)[numRows] columns;
+        ColumnVector[numRows] columns;
         T[numColumns * numRows] elements;
     }
     alias columns this;
+
+    this(const Vector!(T, numColumns)[numRows] columns)
+    {
+        this.columns = columns;
+    }
+
+    this(const T[numColumns * numRows] elements)
+    {
+        this.elements = elements;
+    }
+
+    this(Args...)(const Args args)
+    if (args.length == numColumns * numRows)
+    {
+        elements[] = [args];
+    }
+
+    ColumnVector opBinary(string op : "*")(RowVector vec)
+    {
+        ColumnVector result = void;
+        foreach (i; 0 .. numRows)
+        {
+            T sum = 0;
+            foreach (j; 0 .. numColumns)
+            {
+                sum += columns[j][i] * vec[j];
+            }
+            result[i] = sum;
+        }
+        return result;
+    }
 
     // Matrix 4x4 methods
     static if (numColumns == 4 && numRows == 4)

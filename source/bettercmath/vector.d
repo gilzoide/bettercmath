@@ -248,12 +248,12 @@ if (N > 1)
         assert(Vec2(3f, 4f) ~ v1 == Vec4(3, 4, 1, 2));
     }
 
-    Self opOpAssign(string op)(const T scalar)
+    ref Self opOpAssign(string op)(const T scalar)
     {
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
         return this;
     }
-    Self opOpAssign(string op)(const Self other)
+    ref Self opOpAssign(string op)(const Self other)
     {
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;
