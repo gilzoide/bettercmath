@@ -1,6 +1,6 @@
 module bettercmath.vector;
 
-import core.stdc.math;
+import bettercmath.cmath;
 import std.algorithm : among;
 
 @safe @nogc pure nothrow:
@@ -256,7 +256,7 @@ if (N > 1)
         return this;
     }
 
-    float magnitudeSquared()
+    T magnitudeSquared()
     {
         import std.algorithm : sum;
         Self squared = this * this;
@@ -272,8 +272,22 @@ if (N > 1)
         assert(Vec2(1, 2).magnitudeSquared() == 5);
     }
 
-    float magnitude()
+    T magnitude()
     {
-        return sqrtf(magnitudeSquared());
+        return sqrt!T(magnitudeSquared());
+    }
+
+    unittest
+    {
+        assert(Vec2.sizeof == Vec2.elements.sizeof);
+        assert(Vec3.sizeof == Vec3.elements.sizeof);
+        assert(Vec4.sizeof == Vec4.elements.sizeof);
+
+        alias Vec2_100 = Vec2[100];
+        assert(Vec2_100.sizeof == 100 * Vec2.elements.sizeof);
     }
 }
+
+/// True if `T` is some kind of Vector
+enum isVector(T) = is(T: Vector!U, U...);
+
