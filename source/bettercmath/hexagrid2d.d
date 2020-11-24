@@ -7,6 +7,8 @@ import bettercmath.matrix;
 import std.algorithm : among;
 import std.traits : isFloatingPoint;
 
+@safe @nogc pure nothrow:
+
 private enum sqrt3 = sqrt(3);
 
 version (unittest)

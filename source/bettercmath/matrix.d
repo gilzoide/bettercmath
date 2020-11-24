@@ -5,6 +5,8 @@ import bettercmath.vector;
 import std.math : PI;
 import std.traits;
 
+@safe @nogc pure nothrow:
+
 version (unittest)
 {
     private alias Vec2 = Vector!(float, 2);
@@ -145,5 +147,6 @@ unittest
 {
     Mat2 m = Mat2.fromColumns(1, 2, 3, 4);
     Vec2 v = [2, 3];
-    assert(m * v == [1*2 + 3*3, 2*2 + 4*3]);
+    float[2] result = [1*2 + 3*3, 2*2 + 4*3];
+    assert(m * v == result);
 }
