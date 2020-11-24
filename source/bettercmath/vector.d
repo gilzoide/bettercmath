@@ -248,6 +248,23 @@ if (N > 1)
         assert(Vec2(3f, 4f) ~ v1 == Vec4(3, 4, 1, 2));
     }
 
+    Vector!(T2, N) opCast(U : Vector!(T2, N), T2)() const
+    {
+        typeof(return) result;
+        foreach (i; 0 .. N)
+        {
+            result[i] = cast(T2) elements[i];
+        }
+        return result;
+    }
+    unittest
+    {
+        Vec2i intVec = [1, 2];
+        Vec2 floatVec = cast(Vec2) intVec;
+        assert(floatVec == Vec2(1f, 2f));
+        assert(cast(Vec2i) floatVec == intVec);
+    }
+
     ref Self opOpAssign(string op)(const T scalar)
     {
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
