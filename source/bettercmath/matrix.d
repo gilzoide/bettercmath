@@ -40,7 +40,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
     this(Args...)(const Args args)
     if (args.length == numColumns * numRows)
     {
-        elements[] = [args];
+        elements = [args];
     }
 
     ColumnVector opBinary(string op : "*")(RowVector vec)
@@ -84,7 +84,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
             Self result;
 
-            T cotangent = 1.0 / tan!T(fov * (PI / 360.0));
+            T cotangent = 1.0 / tan(fov * (PI / 360.0));
 
             result.columns[0][0] = cotangent / aspectRatio;
             result.columns[1][1] = cotangent;

@@ -1,9 +1,25 @@
 module bettercmath.cmath;
 
 import cmath = core.stdc.math;
+import dmath = std.math;
+import std.meta : AliasSeq;
 import std.traits : isFloatingPoint, isNumeric;
 
-enum functions = [
+/// Templated alias for a floating point type correspondent with `T`.
+template FloatType(T)
+if (isNumeric!T)
+{
+    static if (isFloatingPoint!T)
+    {
+        alias FloatType = T;
+    }
+    else
+    {
+        alias FloatType = float;
+    }
+}
+
+private enum functions = AliasSeq!(
     "acos",
     "asin",
     "atan",
@@ -61,24 +77,45 @@ enum functions = [
     "fmax",
     "fmin",
     "fma",
-];
+);
+
 static foreach (f; functions)
 {
-    mixin(q{alias } ~ f ~ q{(T : int) = cmath.} ~ f ~ "f;");
-    mixin(q{alias } ~ f ~ q{(T : float) = cmath.} ~ f ~ "f;");
-    mixin(q{alias } ~ f ~ q{(T : double) = cmath.} ~ f ~ ";");
-    mixin(q{alias } ~ f ~ q{(T : real) = cmath.} ~ f ~ "l;");
+    mixin(q{alias } ~ f ~ q{ = MathFunc!} ~ "\"" ~ f ~ "\";");
 }
 
-template FloatType(T)
-if (isNumeric!T)
+// Private helpers for templated math function calls
+private string cfuncname(T : double, string f)()
 {
-    static if (isFloatingPoint!T)
+    return f;
+}
+private string cfuncname(T : real, string f)()
+{
+    return f ~ "l";
+}
+private string cfuncname(T : float, string f)()
+{
+    return f ~ "f";
+}
+private string cfuncname(T : int, string f)()
+{
+    return f ~ "f";
+}
+
+private struct MathFunc(string f)
+{
+    static auto opCall(T, Args...)(T arg1, Args args)
     {
-        alias FloatType = T;
-    }
-    else
-    {
-        alias FloatType = float;
+        if (__ctfe)
+        {
+            // Use D functions on CTFE
+            return __traits(getMember, dmath, f)(cast(FloatType!T) arg1, args);
+        }
+        else
+        {
+            // Use the appropriate C function on runtime
+            return __traits(getMember, cmath, cfuncname!(T, f)())(arg1, args);
+        }
     }
 }
+
