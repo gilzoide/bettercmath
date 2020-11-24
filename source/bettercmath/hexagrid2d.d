@@ -5,11 +5,9 @@ import bettercmath.cmath;
 import bettercmath.vector;
 import bettercmath.matrix;
 import std.algorithm : among;
-import std.math : abs, sqrt;
 import std.traits : isFloatingPoint;
 
-private enum sqrt3 = sqrt(3f);
-private alias Mat2 = Matrix!(float, 2);
+private enum sqrt3 = sqrt(3);
 
 version (unittest)
 {
@@ -27,6 +25,7 @@ struct Hex(Orientation orientation, T = int)
 {
     private alias Self = typeof(this);
     private alias FT = FloatType!T;
+    private alias Mat2 = Matrix!(float, 2);
 
     /// Axial coordinates, see https://www.redblobgames.com/grids/hexagons/implementation.html
     private const Vector!(T, 2) coordinates;
@@ -61,15 +60,15 @@ struct Hex(Orientation orientation, T = int)
             SouthEast = Self(0, 1),
             SE = SouthEast,
         }
-        enum toPixelMatrix = Mat2(
+        private enum toPixelMatrix = Mat2(
             sqrt3, sqrt3 / 2.0,
             0,     3.0 / 2.0
         );
-        enum fromPixelMatrix = Mat2(
+        private enum fromPixelMatrix = Mat2(
             sqrt3 / 3.0, -1.0 / 3.0,
             0,            2.0 / 3.0
         );
-        enum angles = [30, 90, 150, 210, 270, 330];
+        private enum FT[6] angles = [30, 90, 150, 210, 270, 330];
     }
     else
     {
@@ -88,15 +87,15 @@ struct Hex(Orientation orientation, T = int)
             South = Self(0, 1),
             S = South,
         }
-        enum toPixelMatrix = Mat2(
+        private enum toPixelMatrix = Mat2(
             3.0 / 2.0,   0,
             sqrt3 / 2.0, sqrt3
         );
-        enum fromPixelMatrix = Mat2(
+        private enum fromPixelMatrix = Mat2(
             2.0 / 3.0,  0,
             -1.0 / 3.0, sqrt3 / 3.0
         );
-        enum angles = [0, 60, 120, 180, 240, 300];
+        private enum FT[6] angles = [0, 60, 120, 180, 240, 300];
     }
     
     this(T q, T r)
@@ -125,7 +124,7 @@ struct Hex(Orientation orientation, T = int)
     T magnitude() const
     {
         import std.algorithm : sum;
-        return (abs(q) + abs(r) + abs(s)) / 2;
+        return cast(T)((fabs(q) + fabs(r) + fabs(s)) / 2);
     }
 
     T distanceTo(Self other) const
@@ -134,14 +133,13 @@ struct Hex(Orientation orientation, T = int)
         return vector.magnitude();
     }
 
-    static Vector!(F, 2)[6] corners(F = float)(F sizeX, F sizeY)
-    if (isFloatingPoint!F)
+    static Vector!(FT, 2)[6] corners(FT sizeX, FT sizeY)
     {
-        typeof(return) result;
+        typeof(return) result = void;
         foreach (i; 0 .. 6)
         {
-            auto angle = deg2rad(angles[i]);
-            result[i] = [sizeX * cos!F(angle), sizeY * sin!F(angle)];
+            FT angle = deg2rad(angles[i]);
+            result[i] = [sizeX * cos(angle), sizeY * sin(angle)];
         }
         return result;
     }
