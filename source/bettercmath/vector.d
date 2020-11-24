@@ -21,8 +21,6 @@ version (unittest)
 struct Vector(T, uint N)
 if (N > 1)
 {
-    private alias Self = typeof(this);
-
     /// Element array.
     T[N] elements = 0;
     alias elements this;
@@ -119,16 +117,16 @@ if (N > 1)
     }
 
     /// Vector with all zeros
-    enum Self zeros = 0;
+    enum Vector zeros = 0;
     alias zeroes = zeros;
     /// Vector with all ones
-    enum Self ones = 1;
+    enum Vector ones = 1;
 
     // Operators
-    Self opUnary(string op)() const
+    Vector opUnary(string op)() const
     if (op.among("-", "+", "~"))
     {
-        Self result;
+        Vector result;
         mixin(q{result =} ~ op ~ q{elements[];});
         return result;
     }
@@ -137,10 +135,10 @@ if (N > 1)
         assert(-Vec2(1, -2) == [-1, 2]);
     }
 
-    Self opBinary(string op)(const T scalar) const
+    Vector opBinary(string op)(const T scalar) const
     if (!op.among("~", "<<", ">>", ">>>"))
     {
-        Self result;
+        Vector result;
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
         return result;
     }
@@ -161,10 +159,10 @@ if (N > 1)
     }
     /// TODO: shift operations
 
-    Self opBinaryRight(string op)(const T scalar) const
+    Vector opBinaryRight(string op)(const T scalar) const
     if (!op.among("~", "<<", ">>", ">>>"))
     {
-        Self result;
+        Vector result;
         mixin(q{result = scalar} ~ op ~ q{elements[];});
         return result;
     }
@@ -184,10 +182,10 @@ if (N > 1)
         assert((1 ^ b) == [1 ^ 1, 1 ^ 2]);
     }
 
-    Self opBinary(string op)(const Self other) const
+    Vector opBinary(string op)(const Vector other) const
     if (op != "~")
     {
-        Self result;
+        Vector result;
         mixin(q{result = elements[]} ~ op ~ q{other.elements[];});
         return result;
     }
@@ -265,12 +263,12 @@ if (N > 1)
         assert(cast(Vec2i) floatVec == intVec);
     }
 
-    ref Self opOpAssign(string op)(const T scalar)
+    ref Vector opOpAssign(string op)(const T scalar)
     {
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
         return this;
     }
-    ref Self opOpAssign(string op)(const Self other)
+    ref Vector opOpAssign(string op)(const Self other)
     {
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;

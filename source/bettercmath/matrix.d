@@ -7,14 +7,16 @@ import std.traits;
 
 version (unittest)
 {
+    private alias Vec2 = Vector!(float, 2);
+    private alias Mat2 = Matrix!(float, 2);
+    private alias Mat3 = Matrix!(float, 3);
+    private alias Mat34 = Matrix!(float, 3, 4);
     private alias Mat4 = Matrix!(float, 4);
 }
 
 struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
 if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 {
-    private alias Self = typeof(this);
-
     enum numColumns = _numColumns;
     enum numRows = _numRows;
     alias RowVector = Vector!(T, numColumns);
@@ -22,28 +24,69 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 
     union
     {
-        ColumnVector[numRows] columns;
+        ColumnVector[numColumns] columns;
         T[numColumns * numRows] elements;
     }
     alias columns this;
 
-    this(const Vector!(T, numColumns)[numRows] columns)
+    static Matrix fromColumns(Args...)(const Args args)
     {
-        this.columns = columns;
+        Matrix mat;
+        mat.elements = [args];
+        return mat;
+    }
+    static Matrix fromColumns(const T[numColumns * numRows] elements)
+    {
+        Matrix mat;
+        mat.elements = elements;
+        return mat;
+    }
+    static Matrix fromColumns(const T[numColumns][numRows] columns)
+    {
+        Matrix mat;
+        mat.columns = cast(ColumnVector[numColumns]) columns;
+        return mat;
     }
 
-    this(const T[numColumns * numRows] elements)
+    static Matrix fromRows(Args...)(const Args args)
+    if (args.length == numRows * numColumns)
     {
-        this.elements = elements;
+        Matrix mat;
+        static foreach (i; 0 .. numRows)
+        {
+            static foreach (j; 0 .. numColumns)
+            {
+                mat.columns[j][i] = args[i*numColumns + j];
+            }
+        }
+        return mat;
+    }
+    static Matrix fromRows(const T[numRows][numColumns] rows)
+    {
+        Matrix mat;
+        foreach (i; 0 .. numRows)
+        {
+            foreach (j; 0 .. numColumns)
+            {
+                mat.columns[j][i] = rows[i][j];
+            }
+        }
+        return mat;
+    }
+    static Matrix fromRows(const T[numRows * numColumns] elements)
+    {
+        Matrix mat;
+        foreach (i; 0 .. numRows)
+        {
+            foreach (j; 0 .. numColumns)
+            {
+                mat.columns[j][i] = elements[i*numColumns + j];
+            }
+        }
+        return mat;
     }
 
-    this(Args...)(const Args args)
-    if (args.length == numColumns * numRows)
-    {
-        elements = [args];
-    }
-
-    ColumnVector opBinary(string op : "*")(RowVector vec)
+    ColumnVector opBinary(string op : "*")(const RowVector vec)
     {
         ColumnVector result = void;
         foreach (i; 0 .. numRows)
@@ -61,10 +104,10 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
     // Matrix 4x4 methods
     static if (numColumns == 4 && numRows == 4)
     {
-        static Self orthographic(T left, T right, T bottom, T top, T near = -1, T far = 1)
+        static Matrix orthographic(T left, T right, T bottom, T top, T near = -1, T far = 1)
         {
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glOrtho.xml
-            Self result;
+            Matrix result;
 
             result.columns[0][0] = 2.0 / (right - left);
             result.columns[1][1] = 2.0 / (top - bottom);
@@ -79,10 +122,10 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         }
         alias ortho = orthographic;
 
-        static Self perspective(T fov, T aspectRatio, T near, T far)
+        static Matrix perspective(T fov, T aspectRatio, T near, T far)
         {
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
-            Self result;
+            Matrix result;
 
             T cotangent = 1.0 / tan(fov * (PI / 360.0));
 
@@ -96,4 +139,11 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             return result;
         }
     }
+}
+
+unittest
+{
+    Mat2 m = Mat2.fromColumns(1, 2, 3, 4);
+    Vec2 v = [2, 3];
+    assert(m * v == [1*2 + 3*3, 2*2 + 4*3]);
 }
