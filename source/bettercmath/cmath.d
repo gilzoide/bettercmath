@@ -104,17 +104,24 @@ private string cfuncname(T : int, string f)()
 
 private struct MathFunc(string f)
 {
-    static auto opCall(T, Args...)(T arg1, Args args)
+    template opCall(T, Args...)
     {
-        if (__ctfe)
+        import std.traits : ReturnType;
+        private alias dfunc = __traits(getMember, dmath, f);
+        private alias cfunc = __traits(getMember, cmath, cfuncname!(T, f)());
+
+        nothrow @nogc static ReturnType!cfunc opCall(T arg1, Args args)
         {
-            // Use D functions on CTFE
-            return __traits(getMember, dmath, f)(cast(FloatType!T) arg1, args);
-        }
-        else
-        {
-            // Use the appropriate C function on runtime
-            return __traits(getMember, cmath, cfuncname!(T, f)())(arg1, args);
+            if (__ctfe)
+            {
+                // Use D functions on CTFE
+                return dfunc(cast(FloatType!T) arg1, args);
+            }
+            else
+            {
+                // Use the appropriate C function on runtime
+                return cfunc(arg1, args);
+            }
         }
     }
 }
