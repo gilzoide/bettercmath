@@ -4,7 +4,7 @@ import bettercmath.cmath;
 import std.algorithm : among, sum;
 import std.traits : isFloatingPoint;
 
-@safe @nogc pure nothrow:
+@safe @nogc nothrow:
 
 version (unittest)
 {
@@ -21,6 +21,7 @@ version (unittest)
 struct Vector(T, uint N)
 if (N > 1)
 {
+pure:
     /// Element array.
     T[N] elements = 0;
     alias elements this;
@@ -113,7 +114,7 @@ if (N > 1)
     /// Constructs a Vector from static array.
     this(const T[N] values)
     {
-        elements[] = values[];
+        elements = values;
     }
 
     /// Vector with all zeros
@@ -288,13 +289,13 @@ if (N > 1)
 /// True if `T` is some kind of Vector
 enum isVector(T) = is(T: Vector!U, U...);
 
-T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
+pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 {
     auto multiplied = a * b;
     return multiplied[].sum;
 }
 
-T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
+pure T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
 {
     return dot(vec, vec);
 }
@@ -308,11 +309,33 @@ unittest
     assert(Vec2(1, 2).magnitudeSquared() == 5);
 }
 
-template magnitude(T, uint N)
+auto magnitude(T, uint N)(const Vector!(T, N) vec)
 {
-    private alias FT = FloatType!T;
-    FT magnitude(const Vector!(T, N) vec)
+    return sqrt(vec.magnitudeSquared());
+}
+unittest
+{
+    assert(Vec2(0, 0).magnitude() == 0);
+    assert(Vec2(1, 0).magnitude() == 1);
+    assert(Vec2(0, 1).magnitude() == 1);
+    assert(Vec2(1, 1).magnitude() == sqrt(2f));
+    assert(Vec2(2, 0).magnitude() == 2);
+}
+
+Vector!(typeof(mapfunc(cast(T) 0)), N) map(alias mapfunc, T, uint N)(const Vector!(T, N) vec)
+{
+    typeof(return) result;
+    foreach (i; 0 .. N)
     {
-        return sqrt!FT(vec.magnitudeSquared());
+        result[i] = mapfunc(vec[i]);
     }
+    return result;
+}
+unittest
+{
+    Vec3 v = [-1, 2.5, -3];
+    import std.math : abs, floor;
+    assert(v.map!(abs) == Vec3(1, 2.5, 3));
+    assert(v.map!(floor) == Vec3(-1, 2, -3));
+    assert(v.map!(x => x + 1) == Vec3(-1 + 1, 2.5 + 1, -3 + 1));
 }
