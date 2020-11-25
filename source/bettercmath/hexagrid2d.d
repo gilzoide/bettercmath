@@ -8,14 +8,14 @@ import std.algorithm : among;
 import std.traits : isFloatingPoint;
 
 /// Lots of ideas from https://www.redblobgames.com/grids/hexagons/
-@safe @nogc pure nothrow:
+@safe @nogc nothrow:
 
 private enum sqrt3 = sqrt(3);
 
 version (unittest)
 {
-    private alias Hexi = Hex!(Orientation.pointy, int);
-    private alias Hexif = Hex!(Orientation.flat, int);
+    private alias Hexi = Hex!(int);
+    private alias Hexf = Hex!(float);
 }
 
 enum Orientation
@@ -27,17 +27,33 @@ enum Orientation
 struct Layout(Orientation orientation, FT = float)
 if (isFloatingPoint!FT)
 {
+pure:
     private alias Mat2 = Matrix!(FT, 2);
     private alias Vec2 = Vector!(FT, 2);
 
-    alias Hexagon = Hex!(orientation, int);
-    alias FractionalHexagon = Hex!(orientation, FT);
+    alias Hexagon = Hex!(int);
+    alias FractionalHexagon = Hex!(FT);
 
     Vec2 origin;
     Vec2 size;
 
     static if (orientation == Orientation.pointy)
     {
+        enum Directions
+        {
+            East = Hexagon(1, 0),
+            E = East,
+            NorthEast = Hexagon(1, -1),
+            NE = NorthEast,
+            NorthWest = Hexagon(0, -1),
+            NW = NorthWest,
+            West = Hexagon(-1, 0),
+            W = West,
+            SouthWest = Hexagon(-1, 1),
+            SW = SouthWest,
+            SouthEast = Hexagon(0, 1),
+            SE = SouthEast,
+        }
         private enum toPixelMatrix = Mat2.fromRows(
             sqrt3, sqrt3 / 2.0,
             0,     3.0 / 2.0
@@ -50,6 +66,21 @@ if (isFloatingPoint!FT)
     }
     else
     {
+        enum Directions
+        {
+            SouthEast = Hexagon(1, 0),
+            SE = SouthEast,
+            NorthEast = Hexagon(1, -1),
+            NE = NorthEast,
+            North = Hexagon(0, -1),
+            N = North,
+            NorthWest = Hexagon(-1, 0),
+            NW = NorthWest,
+            SouthWest = Hexagon(-1, 1),
+            SW = SouthWest,
+            South = Hexagon(0, 1),
+            S = South,
+        }
         private enum toPixelMatrix = Mat2.fromRows(
             3.0 / 2.0,   0,
             sqrt3 / 2.0, sqrt3
@@ -85,8 +116,9 @@ if (isFloatingPoint!FT)
     }
 }
 
-struct Hex(Orientation orientation, T = int)
+struct Hex(T = int)
 {
+pure:
     /// Axial coordinates, see https://www.redblobgames.com/grids/hexagons/implementation.html
     const Vector!(T, 2) coordinates;
     
@@ -103,43 +135,6 @@ struct Hex(Orientation orientation, T = int)
         return -q -r;
     }
 
-    static if (orientation == Orientation.pointy)
-    {
-        enum Directions
-        {
-            East = Hex(1, 0),
-            E = East,
-            NorthEast = Hex(1, -1),
-            NE = NorthEast,
-            NorthWest = Hex(0, -1),
-            NW = NorthWest,
-            West = Hex(-1, 0),
-            W = West,
-            SouthWest = Hex(-1, 1),
-            SW = SouthWest,
-            SouthEast = Hex(0, 1),
-            SE = SouthEast,
-        }
-    }
-    else
-    {
-        enum Directions
-        {
-            SouthEast = Hex(1, 0),
-            SE = SouthEast,
-            NorthEast = Hex(1, -1),
-            NE = NorthEast,
-            North = Hex(0, -1),
-            N = North,
-            NorthWest = Hex(-1, 0),
-            NW = NorthWest,
-            SouthWest = Hex(-1, 1),
-            SW = SouthWest,
-            South = Hex(0, 1),
-            S = South,
-        }
-    }
-    
     this(T q, T r)
     {
         coordinates = [q, r];
@@ -176,13 +171,33 @@ struct Hex(Orientation orientation, T = int)
     }
 }
 
-struct RectangleHexagrid(Orientation orientation, T, uint columns, uint rows)
+Hex!(int) rounded(FT)(const Hex!(FT) hex)
+if (isFloatingPoint!FT)
 {
-    Hex!(orientation, int) hexagons;
-    T[columns][rows] values;
-}
+    alias Vec3 = Vector!(FT, 3);
+    Vec3 cubic_hex = hex.coordinates ~ hex.s;
+    Vec3 roundedVec = cubic_hex.map!(round);
+    Vec3 diff = roundedVec - cubic_hex;
 
+    if (diff[0] > diff[1] && diff[0] > diff[2])
+    {
+        roundedVec[0] = -roundedVec[1] - roundedVec[2];
+    }
+    else if (diff[1] > diff[2])
+    {
+        roundedVec[1] = -roundedVec[0] - roundedVec[2];
+    }
+    return typeof(return)(cast(int) roundedVec[0], cast(int) roundedVec[1]);
+}
 unittest
 {
-    alias Hexi = Hex!(Orientation.pointy, int);
+    Hexf a = Hexf(2.1, 3.5); // -5.6
+    assert(a.rounded() == Hexi(2, 4));
+}
+
+struct RectangleHexagrid(Orientation orientation, T, uint columns, uint rows)
+{
+    Layout!(orientation) layout;
+    Hex!(int) hexagons;
+    T[columns][rows] values;
 }
