@@ -27,19 +27,13 @@ pure:
     alias elements this;
 
     private ref inout(T) _get(int i)() inout
-    in
-    {
-        assert(i >= 0 && i <= N, "Index out of bounds");
-    }
+    in { assert(i >= 0 && i <= N, "Index out of bounds"); }
     do
     {
         return elements[i];
     }
     private ref inout(T[to - from]) _slice(int from, int to)() inout
-    in
-    {
-        assert(from >= 0 && to <= N, "Index out of bounds");
-    }
+    in { assert(from >= 0 && to <= N, "Index out of bounds"); }
     do
     {
         return elements[from .. to];
@@ -296,6 +290,8 @@ pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 }
 
 pure T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
+out (r) { assert(r >= 0, "Vector squared magnitude should be non-negative!"); }
+do
 {
     return dot(vec, vec);
 }
@@ -310,6 +306,8 @@ unittest
 }
 
 auto magnitude(T, uint N)(const Vector!(T, N) vec)
+out (r) { assert(r >= 0, "Vector magnitude should be non-negative!"); }
+do
 {
     return sqrt(vec.magnitudeSquared());
 }
