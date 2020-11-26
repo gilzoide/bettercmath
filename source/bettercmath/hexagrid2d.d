@@ -124,7 +124,7 @@ pure:
     private Vector!(T, 2) _coordinates;
     @property const(typeof(_coordinates)) coordinates() const
     {
-        return coordinates;
+        return _coordinates;
     }
     
     @property T q() const
