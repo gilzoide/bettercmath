@@ -30,6 +30,7 @@ if (isFloatingPoint!FT)
 pure:
     private alias Mat2 = Matrix!(FT, 2);
     private alias Vec2 = Vector!(FT, 2);
+    private alias Vec2i = Vector!(int, 2);
 
     alias Hexagon = Hex!(int);
     alias FractionalHexagon = Hex!(FT);
@@ -120,7 +121,11 @@ struct Hex(T = int)
 {
 pure:
     /// Axial coordinates, see https://www.redblobgames.com/grids/hexagons/implementation.html
-    const Vector!(T, 2) coordinates;
+    private Vector!(T, 2) _coordinates;
+    @property const(typeof(_coordinates)) coordinates() const
+    {
+        return coordinates;
+    }
     
     @property T q() const
     {
@@ -137,11 +142,11 @@ pure:
 
     this(T q, T r)
     {
-        coordinates = [q, r];
+        _coordinates = [q, r];
     }
     this(T[2] coordinates)
     {
-        this.coordinates = coordinates;
+        _coordinates = coordinates;
     }
 
     // Operations
