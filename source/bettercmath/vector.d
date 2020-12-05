@@ -99,16 +99,39 @@ pure:
     {
         elements[] = scalar;
     }
+    unittest
+    {
+        Vec2 v;
+        v = Vec2(1);
+        v = Vec2(1.0);
+        v = Vec2(1.0f);
+    }
     /// Constructs a Vector with all elements initialized separetely
     this(Args...)(const Args args)
     if (args.length == N)
     {
         elements = [args];
     }
+    unittest
+    {
+        Vec2 v;
+        v = Vec2(1, 2);
+        v = Vec2(1, 2.0);
+        v = Vec2(1.0, 2);
+        v = Vec2(1.0, 2.0);
+        v = Vec2(1.0f, 2.0f);
+    }
     /// Constructs a Vector from static array.
     this(const T[N] values)
     {
         elements = values;
+    }
+    unittest
+    {
+        Vec2 v;
+        v = Vec2([1, 2]);
+        v = Vec2([1.0, 2.0]);
+        v = Vec2([1.0f, 2.0f]);
     }
 
     /// Vector with all zeros
