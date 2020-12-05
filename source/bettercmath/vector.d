@@ -286,7 +286,7 @@ pure:
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
         return this;
     }
-    ref Vector opOpAssign(string op)(const Self other)
+    ref Vector opOpAssign(string op)(const Vector other)
     {
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;
