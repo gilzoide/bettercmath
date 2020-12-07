@@ -1,9 +1,10 @@
 module bettercmath.matrix;
 
-import bettercmath.cmath;
-import bettercmath.vector;
 import std.math : PI;
 import std.traits;
+
+import bettercmath.cmath;
+import bettercmath.vector;
 
 @safe @nogc pure nothrow:
 

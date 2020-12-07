@@ -1,8 +1,9 @@
 module bettercmath.vector;
 
-import bettercmath.cmath;
 import std.algorithm : among, sum;
 import std.traits : isFloatingPoint;
+
+import bettercmath.cmath;
 
 @safe @nogc nothrow:
 

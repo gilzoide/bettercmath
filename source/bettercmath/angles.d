@@ -1,7 +1,8 @@
 module bettercmath.angles;
 
-import bettercmath.cmath : FloatType;
 import std.math : PI;
+
+import bettercmath.cmath : FloatType;
 
 FloatType!T degreesToRadians(T)(T degrees)
 {

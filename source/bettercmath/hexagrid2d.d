@@ -1,11 +1,12 @@
 module bettercmath.hexagrid2d;
 
+import std.algorithm : among;
+import std.traits : isFloatingPoint;
+
 import bettercmath.angles;
 import bettercmath.cmath;
 import bettercmath.vector;
 import bettercmath.matrix;
-import std.algorithm : among;
-import std.traits : isFloatingPoint;
 
 /// Lots of ideas from https://www.redblobgames.com/grids/hexagons/
 @safe @nogc nothrow:
