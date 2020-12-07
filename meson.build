@@ -6,6 +6,7 @@ sources = files(
   'source/bettercmath/hexagrid2d.d',
   'source/bettercmath/package.d',
   'source/bettercmath/matrix.d',
+  'source/bettercmath/transform.d',
   'source/bettercmath/vector.d',
 )
 incdir = include_directories('source')
