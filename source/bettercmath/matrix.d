@@ -21,8 +21,8 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 {
     enum numColumns = _numColumns;
     enum numRows = _numRows;
-    alias RowVector = Vector!(T, numColumns);
-    alias ColumnVector = Vector!(T, numRows);
+    alias RowVector = T[numColumns];
+    alias ColumnVector = T[numRows];
 
     union
     {
