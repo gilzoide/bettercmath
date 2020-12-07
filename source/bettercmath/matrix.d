@@ -3,11 +3,12 @@ module bettercmath.matrix;
 import std.math : PI;
 import std.traits : isFloatingPoint;
 
+import bettercmath.vector;
+
 @safe @nogc pure nothrow:
 
 version (unittest)
 {
-    import bettercmath.vector;
     private alias Vec2 = Vector!(float, 2);
     private alias Mat2 = Matrix!(float, 2);
     private alias Mat3 = Matrix!(float, 3);
@@ -18,8 +19,10 @@ version (unittest)
 struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
 if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 {
+    import std.algorithm : min;
     enum numColumns = _numColumns;
     enum numRows = _numRows;
+    enum minDimension = min(numColumns, numRows);
     enum numElements = numColumns * numRows;
     enum isSquare = numColumns == numRows;
     alias RowVector = T[numColumns];
@@ -27,9 +30,23 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 
     T[numElements] elements = 0;
     
-    ref inout(T)opIndex(size_t i, size_t j) inout
+    inout(T)[] opIndex(size_t i) inout
+    {
+        auto initialIndex = i * numColumns;
+        return elements[initialIndex .. initialIndex + numColumns];
+    }
+    ref inout(T) opIndex(size_t i, size_t j) inout
     {
         return elements[i*numColumns + j];
+    }
+
+    @property size_t opDollar(size_t pos : 0)()
+    {
+        return numColumns;
+    }
+    @property size_t opDollar(size_t pos : 1)()
+    {
+        return numRows;
     }
 
     static Matrix fromColumns(Args...)(const Args args)
@@ -60,7 +77,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         return fromColumns(args).transposed;
     }
 
-    Matrix!(T, numRows, numColumns) transposed()
+    Matrix!(T, numRows, numColumns) transposed() const
     {
         typeof(return) newMat = void;
         foreach (i; 0..numRows)
@@ -73,18 +90,33 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         return newMat;
     }
 
+    static Matrix fromDiagonal(const T diag)
+    {
+        Matrix mat;
+        foreach (i; 0 .. minDimension)
+        {
+            mat[i, i] = diag;
+        }
+        return mat;
+    }
+    static Matrix fromDiagonal(uint N)(const Vector!(T, N) diag)
+    if (N <= minDimension)
+    {
+        Matrix mat;
+        foreach (i; 0 .. N)
+        {
+            mat[i, i] = diag[i];
+        }
+        return mat;
+    }
+
+
     static if (isSquare)
     {
         static Matrix makeIdentity()
         {
-            Matrix mat;
-            foreach (i; 0..numColumns)
-            {
-                mat[i, i] = 1;
-            }
-            return mat;
+            return fromDiagonal(1);
         }
-
         enum identity = makeIdentity();
     }
 
