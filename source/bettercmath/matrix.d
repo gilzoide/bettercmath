@@ -27,11 +27,10 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 
     T[numElements] elements = 0;
     
-    @property ref inout(T)[numRows][numColumns] columns() inout
+    ref inout(T)opIndex(size_t i, size_t j) inout
     {
-        return cast(typeof(return)) elements[];
+        return elements[i*numColumns + j];
     }
-    alias columns this;
 
     static Matrix fromColumns(Args...)(const Args args)
     if (args.length == numElements)
@@ -68,7 +67,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         {
             foreach (j; 0..numColumns)
             {
-                newMat.elements[j*numRows + i] = elements[i*numColumns + j];
+                newMat[j, i] = this[i, j];
             }
         }
         return newMat;
@@ -76,15 +75,17 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 
     static if (isSquare)
     {
-        static Matrix identity()
+        static Matrix makeIdentity()
         {
-            Matrix mat = zeros;
+            Matrix mat;
             foreach (i; 0..numColumns)
             {
-                mat[i][i] = 1;
+                mat[i, i] = 1;
             }
             return mat;
         }
+
+        enum identity = makeIdentity();
     }
 
     ColumnVector opBinary(string op : "*")(const RowVector vec)
@@ -95,7 +96,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             T sum = 0;
             foreach (j; 0 .. numColumns)
             {
-                sum += columns[j][i] * vec[j];
+                sum += this[j, i] * vec[j];
             }
             result[i] = sum;
         }
@@ -110,14 +111,14 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glOrtho.xml
             Matrix result;
 
-            result.columns[0][0] = 2.0 / (right - left);
-            result.columns[1][1] = 2.0 / (top - bottom);
-            result.columns[2][2] = 2.0 / (near - far);
-            result.columns[3][3] = 1.0;
+            result[0, 0] = 2.0 / (right - left);
+            result[1, 1] = 2.0 / (top - bottom);
+            result[2, 2] = 2.0 / (near - far);
+            result[3, 3] = 1.0;
 
-            result.columns[3][0] = (left + right) / (left - right);
-            result.columns[3][1] = (bottom + top) / (bottom - top);
-            result.columns[3][2] = (far + near) / (near - far);
+            result[3, 0] = (left + right) / (left - right);
+            result[3, 1] = (bottom + top) / (bottom - top);
+            result[3, 2] = (far + near) / (near - far);
 
             return result;
         }
@@ -131,12 +132,12 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             import bettercmath.cmath : tan;
             T cotangent = 1.0 / tan(fov * (PI / 360.0));
 
-            result.columns[0][0] = cotangent / aspectRatio;
-            result.columns[1][1] = cotangent;
-            result.columns[2][3] = -1.0;
-            result.columns[2][2] = (near + far) / (near - far);
-            result.columns[3][2] = (2.0 * near * far) / (near - far);
-            result.columns[3][3] = 0.0;
+            result[0, 0] = cotangent / aspectRatio;
+            result[1, 1] = cotangent;
+            result[2, 3] = -1.0;
+            result[2, 2] = (near + far) / (near - far);
+            result[3, 2] = (2.0 * near * far) / (near - far);
+            result[3, 3] = 0.0;
 
             return result;
         }
