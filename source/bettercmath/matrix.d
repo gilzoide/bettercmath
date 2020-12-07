@@ -89,6 +89,14 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         return mat;
     }
 
+    static Matrix zeros()
+    {
+        Matrix mat;
+        mat.elements = 0;
+        return mat;
+    }
+    alias zeroes = zeros;
+
     ColumnVector opBinary(string op : "*")(const RowVector vec)
     {
         ColumnVector result = void;
@@ -110,7 +118,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         static Matrix orthographic(T left, T right, T bottom, T top, T near = -1, T far = 1)
         {
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glOrtho.xml
-            Matrix result;
+            Matrix result = zeros;
 
             result.columns[0][0] = 2.0 / (right - left);
             result.columns[1][1] = 2.0 / (top - bottom);
@@ -128,7 +136,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         static Matrix perspective(T fov, T aspectRatio, T near, T far)
         {
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
-            Matrix result;
+            Matrix result = zeros;
 
             T cotangent = 1.0 / tan(fov * (PI / 360.0));
 
