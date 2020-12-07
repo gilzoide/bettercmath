@@ -305,7 +305,7 @@ pure:
 }
 
 /// True if `T` is some kind of Vector
-enum isVector(T) = is(T: Vector!U, U...);
+enum isVector(T) = is(T : Vector!U, U...);
 
 pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 {
