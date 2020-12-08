@@ -74,7 +74,7 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
 
     static Matrix fromRows(Args...)(const Args args)
     {
-        return fromColumns(args).transposed;
+        return Matrix!(T, numRows, numColumns).fromColumns(args).transposed;
     }
 
     Matrix!(T, numRows, numColumns) transposed() const
