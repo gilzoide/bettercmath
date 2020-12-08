@@ -4,6 +4,7 @@ import std.algorithm : among, sum;
 import std.traits : isFloatingPoint;
 
 import bettercmath.cmath;
+public import bettercmath.misc : lerp;
 
 @safe @nogc nothrow:
 
@@ -410,4 +411,13 @@ unittest
     Vec2 v = [200, 0];
     assert(v.normalized() == Vec2(1, 0));
     assert(v == Vec2(200, 0));
+}
+
+unittest
+{
+    Vec2 a = [1, 1];
+    Vec2 b = [2, 3];
+    assert(lerp(a, b, 0) == a);
+    assert(lerp(a, b, 0.5) == Vec2(1.5, 2));
+    assert(lerp(a, b, 1) == b);
 }

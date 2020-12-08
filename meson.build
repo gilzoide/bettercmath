@@ -1,11 +1,11 @@
 project('bettercmath', 'd')
 
 sources = files(
-  'source/bettercmath/angles.d',
   'source/bettercmath/cmath.d',
   'source/bettercmath/hexagrid2d.d',
   'source/bettercmath/package.d',
   'source/bettercmath/matrix.d',
+  'source/bettercmath/misc.d',
   'source/bettercmath/transform.d',
   'source/bettercmath/vector.d',
 )
