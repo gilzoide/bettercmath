@@ -10,6 +10,7 @@ import bettercmath.vector;
 version (unittest)
 {
     private alias Vec2 = Vector!(float, 2);
+    private alias Vec3 = Vector!(float, 3);
     private alias Mat2 = Matrix!(float, 2);
     private alias Mat23 = Matrix!(float, 2, 3);
     private alias Mat32 = Matrix!(float, 3, 2);
@@ -130,6 +131,63 @@ if (_numColumns > 0 && _numRows > 0)
         return mat;
     }
 
+    ColumnVector opBinary(string op : "*")(const RowVector vec) const
+    {
+        typeof(return) result = void;
+        foreach (i; 0 .. numRows)
+        {
+            T sum = 0;
+            foreach (j; 0 .. numColumns)
+            {
+                sum += this[j, i] * vec[j];
+            }
+            result[i] = sum;
+        }
+        return result;
+    }
+    unittest
+    {
+        auto m1 = Mat23.fromRows(1, 2,
+                                 3, 4,
+                                 5, 6);
+        auto v1 = Vec2(1, 2);
+        assert(m1 * v1 == Vec3(1*1 + 2*2,
+                               1*3 + 2*4,
+                               1*5 + 2*6));
+    }
+
+    Matrix!(T, OtherColumns, numRows) opBinary(string op : "*", uint OtherColumns)(const Matrix!(T, OtherColumns, numColumns) other) const
+    {
+        typeof(return) result = void;
+        foreach (i; 0 .. numRows)
+        {
+            foreach (j; 0 .. OtherColumns)
+            {
+                T sum = 0;
+                foreach (k; 0 .. numColumns)
+                {
+                    sum += this[k, i] * other[j, k];
+                }
+                result[j, i] = sum;
+            }
+        }
+        return result;
+    }
+    unittest
+    {
+        alias Mat23 = Matrix!(int, 2, 3);
+        alias Mat12 = Matrix!(int, 1, 2);
+
+        Mat23 m1 = Mat23.fromRows(1, 1,
+                                  2, 2,
+                                  3, 3);
+        Mat12 m2 = Mat12.fromRows(4,
+                                  5);
+        auto result = m1 * m2;
+        assert(result == [1*4 + 1*5,
+                          2*4 + 2*5,
+                          3*4 + 3*5]);
+    }
 
     static if (isSquare)
     {
@@ -151,22 +209,25 @@ if (_numColumns > 0 && _numRows > 0)
             }
             return this;
         }
+
+        ref Matrix opOpAssign(string op : "*")(const Matrix other)
+        {
+            foreach (i; 0 .. numRows)
+            {
+                foreach (j; 0 .. numColumns)
+                {
+                    T sum = 0;
+                    foreach (k; 0 .. numColumns)
+                    {
+                        sum += this[k, i] * other[j, k];
+                    }
+                    this[j, i] = sum;
+                }
+            }
+            return this;
+        }
     }
 
-    ColumnVector opBinary(string op : "*")(const RowVector vec)
-    {
-        ColumnVector result = void;
-        foreach (i; 0 .. numRows)
-        {
-            T sum = 0;
-            foreach (j; 0 .. numColumns)
-            {
-                sum += this[j, i] * vec[j];
-            }
-            result[i] = sum;
-        }
-        return result;
-    }
 
     // Matrix 4x4 methods
     static if (numColumns == 4 && numRows == 4)
@@ -210,15 +271,3 @@ if (_numColumns > 0 && _numRows > 0)
 }
 
 enum isMatrix(T) = is(T : Matrix!U, U...);
-
-unittest
-{
-    Mat2 m = Mat2.fromColumns(1, 2, 3, 4);
-    Vec2 v = [2, 3];
-    float[2] result = [1*2 + 3*3, 2*2 + 4*3];
-    assert(m * v == result);
-
-    float[4][4] cols;
-    float[16] v2 = cast(float[16]) cols;
-    float[4][4] v3 = cast(float[4][4]) v2;
-}
