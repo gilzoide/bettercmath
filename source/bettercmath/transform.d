@@ -31,13 +31,13 @@ if (Dim > 0)
     if (N <= Dim)
     {
         Transform t;
-        t[$-1][0 .. values.length] = values[];
+        t[$-1][0 .. N] = values[];
         return t;
     }
     ref Transform translate(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
-        this[$-1][0 .. values.length] += values[];
+        this[$-1][0 .. N] += values[];
         return this;
     }
     Transform translated(uint N)(const Vector!(T, N) values) const
@@ -52,7 +52,10 @@ if (Dim > 0)
     if (N <= Dim)
     {
         Transform t;
-        t.scale(values);
+        foreach (i; 0 .. N)
+        {
+            t[i, i] *= values[i];
+        }
         return t;
     }
     ref Transform scale(uint N)(const Vector!(T, N) values)
@@ -60,7 +63,10 @@ if (Dim > 0)
     {
         foreach (i; 0 .. N)
         {
-            this[i, i] *= values[i];
+            foreach (j; 0 .. N)
+            {
+                this[j, i] *= values[j];
+            }
         }
         return this;
     }
