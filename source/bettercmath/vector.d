@@ -301,6 +301,10 @@ pure:
 
         alias Vec2_100 = Vec2[100];
         assert(Vec2_100.sizeof == 100 * Vec2.elements.sizeof);
+
+        auto v = Vec2(5);
+        v += 3;
+        assert(v == Vec2(8));
     }
 }
 
@@ -311,6 +315,21 @@ pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 {
     auto multiplied = a * b;
     return multiplied[].sum;
+}
+
+pure Vector!(T, 3) cross(T)(const Vector!(T, 3) a, const Vector!(T, 3) b)
+{
+    typeof(return) result = [
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x,
+    ];
+    return result;
+}
+
+pure Vector!(T, N) reflect(T, uint N)(const Vector!(T, N) vec, const Vector!(T, N) normal)
+{
+    return vec - (2 * normal * dot(vec, normal));
 }
 
 pure T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
@@ -360,4 +379,35 @@ unittest
     assert(v.map!(abs) == Vec3(1, 2.5, 3));
     assert(v.map!(floor) == Vec3(-1, 2, -3));
     assert(v.map!(x => x + 1) == Vec3(-1 + 1, 2.5 + 1, -3 + 1));
+}
+
+ref Vector!(T, N) normalize(T, uint N)(ref return Vector!(T, N) vec)
+{
+    auto sqMag = vec.magnitudeSquared();
+    if (sqMag != 0)
+    {
+        enum FloatType!T one = 1;
+        const auto inverseMag = one / sqrt(sqMag);
+        vec *= inverseMag;
+    }
+    return vec;
+}
+unittest
+{
+    Vec2 v = [5, 0];
+    v.normalize();
+    assert(v == Vec2(1, 0));
+}
+
+Vector!(T, N) normalized(T, uint N)(const Vector!(T, N) vec)
+{
+    typeof(return) copy = vec;
+    copy.normalize();
+    return copy;
+}
+unittest
+{
+    Vec2 v = [200, 0];
+    assert(v.normalized() == Vec2(1, 0));
+    assert(v == Vec2(200, 0));
 }
