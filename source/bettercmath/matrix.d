@@ -11,13 +11,16 @@ version (unittest)
 {
     private alias Vec2 = Vector!(float, 2);
     private alias Mat2 = Matrix!(float, 2);
+    private alias Mat23 = Matrix!(float, 2, 3);
+    private alias Mat32 = Matrix!(float, 3, 2);
     private alias Mat3 = Matrix!(float, 3);
     private alias Mat34 = Matrix!(float, 3, 4);
+    private alias Mat43 = Matrix!(float, 4, 3);
     private alias Mat4 = Matrix!(float, 4);
 }
 
 struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
-if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
+if (_numColumns > 0 && _numRows > 0)
 {
     import std.algorithm : min;
     enum numColumns = _numColumns;
@@ -29,15 +32,20 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
     alias ColumnVector = T[numRows];
 
     T[numElements] elements = 0;
+    alias elements this;
     
     inout(T)[] opIndex(size_t i) inout
+    in { assert(i < numColumns); }
+    do
     {
-        auto initialIndex = i * numColumns;
-        return elements[initialIndex .. initialIndex + numColumns];
+        auto initialIndex = i * numRows;
+        return elements[initialIndex .. initialIndex + numRows];
     }
     ref inout(T) opIndex(size_t i, size_t j) inout
+    in { assert(i < numColumns && j < numRows); }
+    do
     {
-        return elements[i*numColumns + j];
+        return elements[i*numRows + j];
     }
 
     @property size_t opDollar(size_t pos : 0)()
@@ -84,10 +92,22 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
         {
             foreach (j; 0..numColumns)
             {
-                newMat[j, i] = this[i, j];
+                newMat[i, j] = this[j, i];
             }
         }
         return newMat;
+    }
+    unittest
+    {
+        import std.traits : ReturnType;
+        assert(is(ReturnType!(Mat23.transposed) == Mat32));
+        assert(is(ReturnType!(Mat32.transposed) == Mat23));
+        float[6] elements = [1, 2, 3, 4, 5, 6];
+        float[6] transposedElements = [1, 4, 2, 5, 3, 6];
+        auto m1 = Mat23.fromColumns(elements);
+        auto m2 = m1.transposed;
+        assert(m2 == transposedElements);
+        assert(m1.transposed.transposed == m1);
     }
 
     static Matrix fromDiagonal(const T diag)
@@ -118,6 +138,19 @@ if (isFloatingPoint!T && _numColumns > 0 && _numRows > 0)
             return fromDiagonal(1);
         }
         enum identity = makeIdentity();
+
+        ref Matrix transpose()
+        {
+            import std.algorithm : swap;
+            foreach (i; 0..numRows)
+            {
+                foreach (j; 0..numColumns)
+                {
+                    swap(this[j, i], this[i, j]);
+                }
+            }
+            return this;
+        }
     }
 
     ColumnVector opBinary(string op : "*")(const RowVector vec)
