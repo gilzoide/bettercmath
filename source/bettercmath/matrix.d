@@ -86,31 +86,6 @@ if (_numColumns > 0 && _numRows > 0)
         return Matrix!(T, numRows, numColumns).fromColumns(args).transposed;
     }
 
-    Matrix!(T, numRows, numColumns) transposed() const
-    {
-        typeof(return) newMat = void;
-        foreach (i; 0..numRows)
-        {
-            foreach (j; 0..numColumns)
-            {
-                newMat[i, j] = this[j, i];
-            }
-        }
-        return newMat;
-    }
-    unittest
-    {
-        import std.traits : ReturnType;
-        assert(is(ReturnType!(Mat23.transposed) == Mat32));
-        assert(is(ReturnType!(Mat32.transposed) == Mat23));
-        float[6] elements = [1, 2, 3, 4, 5, 6];
-        float[6] transposedElements = [1, 4, 2, 5, 3, 6];
-        auto m1 = Mat23.fromColumns(elements);
-        auto m2 = m1.transposed;
-        assert(m2 == transposedElements);
-        assert(m1.transposed.transposed == m1);
-    }
-
     static Matrix fromDiagonal(const T diag)
     {
         Matrix mat;
@@ -197,19 +172,6 @@ if (_numColumns > 0 && _numRows > 0)
         }
         enum identity = makeIdentity();
 
-        ref Matrix transpose()
-        {
-            import std.algorithm : swap;
-            foreach (i; 0..numRows)
-            {
-                foreach (j; 0..numColumns)
-                {
-                    swap(this[j, i], this[i, j]);
-                }
-            }
-            return this;
-        }
-
         ref Matrix opOpAssign(string op : "*")(const Matrix other)
         {
             foreach (i; 0 .. numRows)
@@ -271,3 +233,47 @@ if (_numColumns > 0 && _numRows > 0)
 }
 
 enum isMatrix(T) = is(T : Matrix!U, U...);
+
+ref Matrix!(T, C, C) transpose(T, uint C)(ref return Matrix!(T, C, C) mat)
+{
+    import std.algorithm : swap;
+    foreach (i; 0 .. C)
+    {
+        foreach (j; i+1 .. C)
+        {
+            swap(mat[j, i], mat[i, j]);
+        }
+    }
+    return mat;
+}
+unittest
+{
+    auto m1 = Mat2.fromRows(1, 2,
+                            3, 4);
+    transpose(m1);
+    assert(m1 == Mat2.fromRows(1, 3,
+                               2, 4));
+}
+
+Matrix!(T, R, C) transposed(T, uint C, uint R)(const Matrix!(T, C, R) mat)
+{
+    typeof(return) newMat = void;
+    foreach (i; 0 .. R)
+    {
+        foreach (j; 0 .. C)
+        {
+            newMat[i, j] = mat[j, i];
+        }
+    }
+    return newMat;
+}
+unittest
+{
+    float[6] elements = [1, 2, 3, 4, 5, 6];
+    float[6] transposedElements = [1, 4, 2, 5, 3, 6];
+    auto m1 = Mat23.fromColumns(elements);
+    auto m2 = transposed(m1);
+    assert(m2 == transposedElements);
+    assert(transposed(m1.transposed) == m1);
+}
+
