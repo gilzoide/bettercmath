@@ -4,6 +4,7 @@ import bettercmath.matrix;
 import bettercmath.vector;
 
 struct Transform(T, uint Dim, bool compact = false)
+if (Dim > 0)
 {
     static if (!compact)
     {
@@ -25,7 +26,7 @@ struct Transform(T, uint Dim, bool compact = false)
         this.matrix = matrix;
     }
 
-    static Transform makeTranslation(uint N)(const Vector!(T, N) values)
+    static Transform fromTranslation(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
         Transform t;
@@ -46,7 +47,7 @@ struct Transform(T, uint Dim, bool compact = false)
         return t;
     }
 
-    static Transform makeScale(uint N)(const Vector!(T, N) values)
+    static Transform fromScaling(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
         Transform t;
@@ -66,6 +67,36 @@ struct Transform(T, uint Dim, bool compact = false)
     {
         Transform t = this;
         t.scale(values);
+        return t;
+    }
+
+    static Transform fromShearing(uint N)(const Vector!(T, N) values)
+    if (N <= Dim)
+    {
+        Transform t;
+        t.shear(values);
+        return t;
+    }
+    ref Transform shear(uint N)(const Vector!(T, N) values)
+    if (N <= Dim)
+    {
+        foreach (i; 0 .. N)
+        {
+            foreach (j; 0 .. N)
+            {
+                if (j != i)
+                {
+                    this[j, i] = values[i];
+                }
+            }
+        }
+        return this;
+    }
+    Transform sheared(uint N)(const Vector!(T, N) values) const
+    if (N <= Dim)
+    {
+        Transform t = this;
+        t.shear(values);
         return t;
     }
 }
