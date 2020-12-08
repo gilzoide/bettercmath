@@ -1,5 +1,6 @@
 module bettercmath.transform;
 
+import bettercmath.cmath : FloatType, cos, sin;
 import bettercmath.matrix;
 import bettercmath.vector;
 
@@ -14,7 +15,7 @@ if (Dim > 0)
     {
         alias MatrixType = Matrix!(T, Dim + 1, Dim);
     }
-    alias VectorType = Vector!(T, Dim);
+    alias FT = FloatType!T;
 
     MatrixType matrix = MatrixType.fromDiagonal(1);
     alias matrix this;
@@ -98,6 +99,52 @@ if (Dim > 0)
         Transform t = this;
         t.shear(values);
         return t;
+    }
+
+    // 2D transforms
+    static if (Dim >= 2)
+    {
+        static Transform fromRotation(const FT angle)
+        {
+            Transform t;
+            auto c = cos(angle), s = sin(angle);
+            t[0, 0] = c;
+            t[0, 1] = -s;
+            t[1, 0] = s;
+            t[1, 1] = c;
+            return t;
+        }
+    }
+    // 3D transforms
+    else static if (Dim >= 3)
+    {
+        static Transform fromXRotation(const FT angle)
+        {
+            Transform t;
+            auto c = cos(angle), s = sin(angle);
+            t[1, 1] = c;
+            t[2, 1] = -s;
+            t[1, 2] = s;
+            t[2, 2] = c;
+            return t;
+        }
+
+        static Transform fromYRotation(const FT angle)
+        {
+            Transform t;
+            auto c = cos(angle), s = sin(angle);
+            t[1, 1] = c;
+            t[2, 1] = -s;
+            t[1, 2] = s;
+            t[2, 2] = c;
+            return t;
+        }
+
+        static Transform fromZRotation(const FT angle)
+        {
+            // same as 2D rotation
+            return fromRotation(angle);
+        }
     }
 }
 
