@@ -1,7 +1,8 @@
 module bettercmath.transform;
 
-import bettercmath.cmath : FloatType, cos, sin;
+import bettercmath.cmath : cos, sin;
 import bettercmath.matrix;
+import bettercmath.misc : FloatType;
 import bettercmath.vector;
 
 struct Transform(T, uint Dim, bool compact = false)
