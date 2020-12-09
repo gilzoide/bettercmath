@@ -8,6 +8,7 @@ sources = files(
   'source/bettercmath/matrix.d',
   'source/bettercmath/misc.d',
   'source/bettercmath/transform.d',
+  'source/bettercmath/valuerange.d',
   'source/bettercmath/vector.d',
 )
 incdir = include_directories('source')

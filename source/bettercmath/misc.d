@@ -17,7 +17,6 @@ if (isNumeric!T)
     }
 }
 
-
 FloatType!T degreesToRadians(T)(T degrees)
 {
     return degrees * (PI / 180.0);
@@ -30,8 +29,7 @@ FloatType!T radiansToDegrees(T)(T radians)
 }
 alias rad2deg = radiansToDegrees;
 
-S lerp(S, T)(const S a, const S b, const T frac)
+T lerp(T, U)(const T from, const T to, const U amount)
 {
-    enum T one = 1;
-    return frac * b + (one - frac) * a;
+    return from + amount * (to - from);
 }
