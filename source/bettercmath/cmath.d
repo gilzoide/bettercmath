@@ -3,21 +3,8 @@ module bettercmath.cmath;
 import cmath = core.stdc.math;
 import dmath = std.math;
 import std.meta : AliasSeq;
-import std.traits : isFloatingPoint, isNumeric;
 
-/// Templated alias for a floating point type correspondent with `T`.
-template FloatType(T)
-if (isNumeric!T)
-{
-    static if (isFloatingPoint!T)
-    {
-        alias FloatType = T;
-    }
-    else
-    {
-        alias FloatType = float;
-    }
-}
+import bettercmath.misc : FloatType;
 
 private enum functions = AliasSeq!(
     "acos",

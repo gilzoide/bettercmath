@@ -1,8 +1,22 @@
 module bettercmath.misc;
 
 import std.math : PI;
+import std.traits : isFloatingPoint, isNumeric;
 
-import bettercmath.cmath : FloatType;
+/// Templated alias for a floating point type correspondent with `T`.
+template FloatType(T)
+if (isNumeric!T)
+{
+    static if (isFloatingPoint!T)
+    {
+        alias FloatType = T;
+    }
+    else
+    {
+        alias FloatType = float;
+    }
+}
+
 
 FloatType!T degreesToRadians(T)(T degrees)
 {
