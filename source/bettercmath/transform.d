@@ -13,10 +13,14 @@ if (Dim > 0)
     static if (!compact)
     {
         alias MatrixType = Matrix!(T, Dim + 1, Dim + 1);
+        alias CompactTransform = Transform!(T, Dim, true);
+        alias FullTransform = typeof(this);
     }
     else
     {
         alias MatrixType = Matrix!(T, Dim + 1, Dim);
+        alias CompactTransform = typeof(this);
+        alias FullTransform = Transform!(T, Dim, false);
     }
     alias FT = FloatType!T;
 
@@ -63,7 +67,7 @@ if (Dim > 0)
     ref Transform scale(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
-        return this.combine(Transform.fromScaling(values));
+        return this.combine(CompactTransform.fromScaling(values));
     }
     Transform scaled(uint N)(const Vector!(T, N) values) const
     {
@@ -90,7 +94,7 @@ if (Dim > 0)
     ref Transform shear(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
-        return this.combine(Transform.fromShearing(values));
+        return this.combine(CompactTransform.fromShearing(values));
     }
     Transform sheared(uint N)(const Vector!(T, N) values) const
     if (N <= Dim)
@@ -106,16 +110,13 @@ if (Dim > 0)
         {
             Transform t;
             const auto c = cos(angle), s = sin(angle);
-            t[0, 0] = c;
-            t[0, 1] = -s;
-            t[1, 0] = s;
-            t[1, 1] = c;
+            t[0, 0] = c; t[0, 1] = -s;
+            t[1, 0] = s; t[1, 1] = c;
             return t;
         }
         ref Transform rotate(const FT angle)
         {
-            auto rotation = Transform.fromRotation(angle);
-            return this.combine(rotation);
+            return this.combine(CompactTransform.fromRotation(angle));
         }
         Transform rotated(const FT angle) const
         {
@@ -130,11 +131,18 @@ if (Dim > 0)
         {
             Transform t;
             auto c = cos(angle), s = sin(angle);
-            t[1, 1] = c;
-            t[2, 1] = -s;
-            t[1, 2] = s;
-            t[2, 2] = c;
+            t[1, 1] = c; t[2, 1] = -s;
+            t[1, 2] = s; t[2, 2] = c;
             return t;
+        }
+        ref Transform rotateX(const FT angle)
+        {
+            return this.combine(CompactTransform.fromXRotation(angle));
+        }
+        Transform rotatedX(const FT angle) const
+        {
+            Transform t = this;
+            return t.rotateX(angle);
         }
 
         static Transform fromYRotation(const FT angle)
@@ -147,20 +155,39 @@ if (Dim > 0)
             t[2, 2] = c;
             return t;
         }
+        ref Transform rotateY(const FT angle)
+        {
+            return this.combine(CompactTransform.fromYRotation(angle));
+        }
+        Transform rotatedY(const FT angle) const
+        {
+            Transform t = this;
+            return t.rotateY(angle);
+        }
 
+        // Rotating in Z is the same as rotating in 2D
         static Transform fromZRotation(const FT angle)
         {
-            // same as 2D rotation
             return fromRotation(angle);
+        }
+        ref Transform rotateZ(const FT angle)
+        {
+            return rotate(angle);
+        }
+        Transform rotatedY(const FT angle) const
+        {
+            return rotated(angle);
         }
     }
 }
 
+/// Pre-multiply transformation into target, returning a reference to target
 ref Transform!(T, Dim, C1) combine(T, uint Dim, bool C1, bool C2)(ref return Transform!(T, Dim, C1) target, const Transform!(T, Dim, C2) transformation)
 {
     target = target.combined(transformation);
     return target;
 }
+/// Returns the result of pre-multiplying transformation and target
 Transform!(T, Dim, C1) combined(T, uint Dim, bool C1, bool C2)(const Transform!(T, Dim, C1) target, const Transform!(T, Dim, C2) transformation)
 {
     // Just about matrix multiplication, but assuming last row is [0...0 1]
