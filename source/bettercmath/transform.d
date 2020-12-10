@@ -5,6 +5,8 @@ import bettercmath.matrix;
 import bettercmath.misc : FloatType;
 import bettercmath.vector;
 
+@nogc @safe pure nothrow:
+
 struct Transform(T, uint Dim, bool compact = false)
 if (Dim > 0)
 {
@@ -45,8 +47,7 @@ if (Dim > 0)
     if (N <= Dim)
     {
         Transform t = this;
-        t.translate(values);
-        return t;
+        return t.translate(values);
     }
 
     static Transform fromScaling(uint N)(const Vector!(T, N) values)
@@ -55,57 +56,47 @@ if (Dim > 0)
         Transform t;
         foreach (i; 0 .. N)
         {
-            t[i, i] *= values[i];
+            t[i, i] = values[i];
         }
         return t;
     }
     ref Transform scale(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
-        foreach (i; 0 .. N)
-        {
-            foreach (j; 0 .. N)
-            {
-                this[j, i] *= values[j];
-            }
-        }
-        return this;
+        return this.combine(Transform.fromScaling(values));
     }
     Transform scaled(uint N)(const Vector!(T, N) values) const
     {
         Transform t = this;
-        t.scale(values);
-        return t;
+        return t.scale(values);
     }
 
     static Transform fromShearing(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
         Transform t;
-        t.shear(values);
-        return t;
-    }
-    ref Transform shear(uint N)(const Vector!(T, N) values)
-    if (N <= Dim)
-    {
         foreach (i; 0 .. N)
         {
             foreach (j; 0 .. N)
             {
                 if (j != i)
                 {
-                    this[j, i] = values[i];
+                    t[j, i] = values[i];
                 }
             }
         }
-        return this;
+        return t;
+    }
+    ref Transform shear(uint N)(const Vector!(T, N) values)
+    if (N <= Dim)
+    {
+        return this.combine(Transform.fromShearing(values));
     }
     Transform sheared(uint N)(const Vector!(T, N) values) const
     if (N <= Dim)
     {
         Transform t = this;
-        t.shear(values);
-        return t;
+        return t.shear(values);
     }
 
     // 2D transforms
@@ -114,12 +105,22 @@ if (Dim > 0)
         static Transform fromRotation(const FT angle)
         {
             Transform t;
-            auto c = cos(angle), s = sin(angle);
+            const auto c = cos(angle), s = sin(angle);
             t[0, 0] = c;
             t[0, 1] = -s;
             t[1, 0] = s;
             t[1, 1] = c;
             return t;
+        }
+        ref Transform rotate(const FT angle)
+        {
+            auto rotation = Transform.fromRotation(angle);
+            return this.combine(rotation);
+        }
+        Transform rotated(const FT angle) const
+        {
+            Transform t = this;
+            return t.rotate(angle);
         }
     }
     // 3D transforms
@@ -153,6 +154,32 @@ if (Dim > 0)
             return fromRotation(angle);
         }
     }
+}
+
+ref Transform!(T, Dim, C1) combine(T, uint Dim, bool C1, bool C2)(ref return Transform!(T, Dim, C1) target, const Transform!(T, Dim, C2) transformation)
+{
+    target = target.combined(transformation);
+    return target;
+}
+Transform!(T, Dim, C1) combined(T, uint Dim, bool C1, bool C2)(const Transform!(T, Dim, C1) target, const Transform!(T, Dim, C2) transformation)
+{
+    // Just about matrix multiplication, but assuming last row is [0...0 1]
+    typeof(return) result;
+    foreach (i; 0 .. Dim)
+    {
+        foreach (j; 0 .. Dim + 1)
+        {
+            T sum = 0;
+            foreach (k; 0 .. Dim)
+            {
+                sum += transformation[k, i] * target[j, k];
+            }
+            result[j, i] = sum;
+        }
+        // Last column has to take input's last row's 1
+        result[Dim, i] += transformation[Dim, i];
+    }
+    return result;
 }
 
 unittest
