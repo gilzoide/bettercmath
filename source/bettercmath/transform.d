@@ -149,10 +149,8 @@ if (Dim > 0)
         {
             Transform t;
             auto c = cos(angle), s = sin(angle);
-            t[1, 1] = c;
-            t[2, 1] = -s;
-            t[1, 2] = s;
-            t[2, 2] = c;
+            t[0, 0] = c; t[2, 0] = s;
+            t[0, 2] = -s; t[2, 2] = c;
             return t;
         }
         ref Transform rotateY(const FT angle)
