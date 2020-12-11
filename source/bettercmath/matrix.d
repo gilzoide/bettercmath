@@ -45,6 +45,27 @@ if (_numColumns > 0 && _numRows > 0)
             this[i, i] = diag;
         }
     }
+
+    auto columns()
+    {
+        import std.range : chunks;
+        return elements[].chunks(numRows);
+    }
+    auto columns() const
+    {
+        import std.range : chunks;
+        return elements[].chunks(numRows);
+    }
+    auto rows()
+    {
+        import std.range : lockstep, StoppingPolicy;
+        return columns.lockstep(StoppingPolicy.requireSameLength);
+    }
+    auto rows() const
+    {
+        import std.range : lockstep, StoppingPolicy;
+        return columns.lockstep(StoppingPolicy.requireSameLength);
+    }
     
     inout(T)[] opIndex(size_t i) inout
     in { assert(i < numColumns); }
