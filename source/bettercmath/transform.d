@@ -15,21 +15,65 @@ if (Dim > 0)
         alias MatrixType = Matrix!(T, Dim + 1, Dim + 1);
         alias CompactTransform = Transform!(T, Dim, true);
         alias FullTransform = typeof(this);
+
+        CompactTransform compact() const
+        {
+            typeof(return) t = void;
+            foreach (i; 0 .. Dim + 1)
+            {
+                t.matrix[i][0 .. Dim] = this.matrix[i][0 .. Dim];
+            }
+            return t;
+        }
+
+        static bool isAffineTransformMatrix(const MatrixType matrix)
+        {
+            import std.algorithm : equal;
+            import std.range : chain, only, repeat;
+            return matrix.rows[Dim].equal(repeat(Dim, 0).chain(only(1)));
+        }
+
+        auto opCast(U : CompactTransform)() const
+        {
+            return compact();
+        }
     }
     else
     {
         alias MatrixType = Matrix!(T, Dim + 1, Dim);
         alias CompactTransform = typeof(this);
         alias FullTransform = Transform!(T, Dim, false);
+        
+        FullTransform full() const
+        {
+            typeof(return) t;
+            foreach (i; 0 .. Dim + 1)
+            {
+                t.matrix[i][0 .. Dim] = this.matrix[i][0 .. Dim];
+            }
+            return t;
+        }
+
+        static bool isAffineTransformMatrix(const MatrixType matrix)
+        {
+            return true;
+        }
+
+        auto opCast(U : FullTransform)() const
+        {
+            return full();
+        }
     }
     alias FT = FloatType!T;
 
-    MatrixType matrix = MatrixType.fromDiagonal(1);
+    MatrixType matrix = MatrixType(1);
     alias matrix this;
 
     enum identity = Transform.init;
 
     this(const MatrixType matrix)
+    in { assert(isAffineTransformMatrix(matrix)); }
+    do
     {
         this.matrix = matrix;
     }
