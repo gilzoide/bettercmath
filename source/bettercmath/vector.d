@@ -4,6 +4,7 @@ import std.algorithm : among, sum;
 import std.traits : isFloatingPoint;
 
 import bettercmath.cmath;
+import bettercmath.misc : FloatType;
 public import bettercmath.misc : lerp;
 
 @safe @nogc nothrow:
