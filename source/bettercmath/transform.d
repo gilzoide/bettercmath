@@ -16,13 +16,19 @@ if (Dim > 0)
         alias CompactTransform = Transform!(T, Dim, true);
         alias FullTransform = typeof(this);
 
+        ref CompactTransform.MatrixType compactInto(ref return CompactTransform.MatrixType mat) inout
+        {
+            foreach (i; 0 .. Dim + 1)
+            {
+                mat[i][0 .. Dim] = this.matrix[i][0 .. Dim];
+            }
+            return mat;
+        }
+
         CompactTransform compact() const
         {
             typeof(return) t = void;
-            foreach (i; 0 .. Dim + 1)
-            {
-                t.matrix[i][0 .. Dim] = this.matrix[i][0 .. Dim];
-            }
+            compactInto(t.matrix);
             return t;
         }
 
@@ -44,13 +50,21 @@ if (Dim > 0)
         alias CompactTransform = typeof(this);
         alias FullTransform = Transform!(T, Dim, false);
         
-        FullTransform full() const
+        ref FullTransform.MatrixType fullInto(ref return FullTransform.MatrixType mat) inout
         {
-            typeof(return) t;
             foreach (i; 0 .. Dim + 1)
             {
-                t.matrix[i][0 .. Dim] = this.matrix[i][0 .. Dim];
+                mat[i][0 .. Dim] = this.matrix[i][0 .. Dim];
+                mat[i][Dim] = 0;
             }
+            mat[Dim][Dim] = 1;
+            return mat;
+        }
+
+        FullTransform full() const
+        {
+            typeof(return) t = void;
+            fullInto(t.matrix);
             return t;
         }
 
