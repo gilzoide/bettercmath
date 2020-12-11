@@ -33,7 +33,18 @@ if (_numColumns > 0 && _numRows > 0)
     alias ColumnVector = T[numRows];
 
     T[numElements] elements = 0;
-    alias elements this;
+
+    this(const T[numElements] elements)
+    {
+        this.elements = elements;
+    }
+    this(const T diag)
+    {
+        foreach (i; 0 .. minDimension)
+        {
+            this[i, i] = diag;
+        }
+    }
     
     inout(T)[] opIndex(size_t i) inout
     in { assert(i < numColumns); }
@@ -61,24 +72,15 @@ if (_numColumns > 0 && _numRows > 0)
     static Matrix fromColumns(Args...)(const Args args)
     if (args.length == numElements)
     {
-        Matrix mat = {
-            elements: [args],
-        };
-        return mat;
+        return Matrix([args]);
     }
     static Matrix fromColumns(const T[numElements] elements)
     {
-        Matrix mat = {
-            elements: elements,
-        };
-        return mat;
+        return Matrix(elements);
     }
     static Matrix fromColumns(const T[numColumns][numRows] columns)
     {
-        Matrix mat = {
-            elements: cast(T[numElements]) columns,
-        };
-        return mat;
+        return Matrix(cast(T[numElements]) columns);
     }
 
     static Matrix fromRows(Args...)(const Args args)
@@ -88,12 +90,7 @@ if (_numColumns > 0 && _numRows > 0)
 
     static Matrix fromDiagonal(const T diag)
     {
-        Matrix mat;
-        foreach (i; 0 .. minDimension)
-        {
-            mat[i, i] = diag;
-        }
-        return mat;
+        return Matrix(diag);
     }
     static Matrix fromDiagonal(uint N)(const Vector!(T, N) diag)
     if (N <= minDimension)
@@ -159,9 +156,11 @@ if (_numColumns > 0 && _numRows > 0)
         Mat12 m2 = Mat12.fromRows(4,
                                   5);
         auto result = m1 * m2;
-        assert(result == [1*4 + 1*5,
-                          2*4 + 2*5,
-                          3*4 + 3*5]);
+        assert(result.elements == [
+            1*4 + 1*5,
+            2*4 + 2*5,
+            3*4 + 3*5,
+        ]);
     }
 
     static if (isSquare)
@@ -273,7 +272,7 @@ unittest
     float[6] transposedElements = [1, 4, 2, 5, 3, 6];
     auto m1 = Mat23.fromColumns(elements);
     auto m2 = transposed(m1);
-    assert(m2 == transposedElements);
+    assert(m2.elements == transposedElements);
     assert(transposed(m1.transposed) == m1);
 }
 
