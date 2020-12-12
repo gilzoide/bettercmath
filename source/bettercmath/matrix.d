@@ -68,14 +68,14 @@ if (_numColumns > 0 && _numRows > 0)
     }
     
     inout(T)[] opIndex(size_t i) inout
-    in { assert(i < numColumns); }
+    in { assert(i < numColumns, "Index out of bounds"); }
     do
     {
         auto initialIndex = i * numRows;
         return elements[initialIndex .. initialIndex + numRows];
     }
     ref inout(T) opIndex(size_t i, size_t j) inout
-    in { assert(i < numColumns && j < numRows); }
+    in { assert(i < numColumns && j < numRows, "Index out of bounds"); }
     do
     {
         return elements[i*numRows + j];

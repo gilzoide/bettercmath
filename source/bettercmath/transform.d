@@ -80,13 +80,13 @@ if (Dim > 0)
     }
     alias FT = FloatType!T;
 
-    MatrixType matrix = MatrixType(1);
+    MatrixType matrix = MatrixType.fromDiagonal(1);
     alias matrix this;
 
     enum identity = Transform.init;
 
     this(const MatrixType matrix)
-    in { assert(isAffineTransformMatrix(matrix)); }
+    in { assert(isAffineTransformMatrix(matrix), "Matrix is not suitable for affine transformations"); }
     do
     {
         this.matrix = matrix;
