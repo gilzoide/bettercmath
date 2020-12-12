@@ -2,7 +2,7 @@ module bettercmath.transform;
 
 import bettercmath.cmath : cos, sin;
 import bettercmath.matrix;
-import bettercmath.misc : FloatType;
+import bettercmath.misc : FloatType, degreesToRadians;
 import bettercmath.vector;
 
 @nogc @safe pure nothrow:
@@ -172,14 +172,26 @@ if (Dim > 0)
             t[1, 0] = s; t[1, 1] = c;
             return t;
         }
+        static auto fromRotationDegrees(const FT degrees)
+        {
+            return fromRotation(degreesToRadians(degrees));
+        }
         ref Transform rotate(const FT angle)
         {
             return this.combine(CompactTransform.fromRotation(angle));
+        }
+        auto rotateDegrees(const FT degrees)
+        {
+            return rotate(degreesToRadians(degrees));
         }
         Transform rotated(const FT angle) const
         {
             Transform t = this;
             return t.rotate(angle);
+        }
+        auto rotatedDegrees(const FT degrees) const
+        {
+            return rotated(degreesToRadians(degrees));
         }
     }
     // 3D transforms
