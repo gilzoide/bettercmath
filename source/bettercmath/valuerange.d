@@ -60,7 +60,3 @@ struct ValueRange(T)
         return to - from;
     }
 }
-
-alias IntRange = ValueRange!int;
-alias FloatRange = ValueRange!float;
-alias DoubleRange = ValueRange!double;
