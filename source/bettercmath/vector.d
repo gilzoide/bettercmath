@@ -29,14 +29,14 @@ pure:
     T[N] elements = 0;
     alias elements this;
 
-    private ref inout(T) _get(int i)() inout
-    in { assert(i >= 0 && i <= N, "Index out of bounds"); }
+    private ref inout(T) _get(size_t i)() inout
+    in { assert(i < N, "Index out of bounds"); }
     do
     {
         return elements[i];
     }
-    private ref inout(T[to - from]) _slice(int from, int to)() inout
-    in { assert(from >= 0 && to <= N, "Index out of bounds"); }
+    private ref inout(T[to - from]) _slice(size_t from, size_t to)() inout
+    in { assert(from <= N - 1 && to <= N, "Index out of bounds"); }
     do
     {
         return elements[from .. to];
