@@ -6,10 +6,11 @@ import bettercmath.misc : FloatType, degreesToRadians;
 
 @nogc @safe pure nothrow:
 
-struct Transform(T, uint Dim, bool compact = false)
+struct Transform(T, uint Dim, bool _isCompact = false)
 if (Dim > 0)
 {
-    static if (!compact)
+    enum isCompact = _isCompact;
+    static if (!isCompact)
     {
         alias MatrixType = Matrix!(T, Dim + 1, Dim + 1);
         alias CompactTransform = Transform!(T, Dim, true);
@@ -95,6 +96,31 @@ if (Dim > 0)
     {
         this = identity;
         return this;
+    }
+
+    T[N] transform(uint N)(const T[N] values) const
+    if (N <= Dim + 1)
+    {
+        typeof(return) result;
+        foreach (i; 0 .. Dim)
+        {
+            T sum = 0;
+            foreach (j; 0 .. N)
+            {
+                sum += matrix[j, i] * values[j];
+            }
+            static if (N < Dim + 1)
+            {
+                sum += matrix[$-1, i];
+            }
+            result[i] = sum;
+        }
+        return result;
+    }
+    auto opBinary(string op : "*", uint N)(const T[N] values) const
+    if (N <= Dim + 1)
+    {
+        return transform(values);
     }
 
     static Transform fromTranslation(uint N)(const T[N] values)

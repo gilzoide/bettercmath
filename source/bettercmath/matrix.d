@@ -81,11 +81,11 @@ if (_numColumns > 0 && _numRows > 0)
         return elements[i*numRows + j];
     }
 
-    @property size_t opDollar(size_t pos : 0)()
+    @property size_t opDollar(size_t pos : 0)() const
     {
         return numColumns;
     }
-    @property size_t opDollar(size_t pos : 1)()
+    @property size_t opDollar(size_t pos : 1)() const
     {
         return numRows;
     }
@@ -126,7 +126,7 @@ if (_numColumns > 0 && _numRows > 0)
 
     ColumnVector opBinary(string op : "*")(const RowVector vec) const
     {
-        typeof(return) result = void;
+        typeof(return) result;
         foreach (i; 0 .. numRows)
         {
             T sum = 0;
