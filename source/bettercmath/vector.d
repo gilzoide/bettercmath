@@ -11,6 +11,7 @@ public import bettercmath.misc : lerp;
 
 version (unittest)
 {
+    private alias Vec1 = Vector!(float, 1);
     private alias Vec2 = Vector!(float, 2);
     private alias Vec2i = Vector!(int, 2);
     private alias Vec3 = Vector!(float, 3);
@@ -22,7 +23,7 @@ version (unittest)
  + TODO: doc
  +/
 struct Vector(T, uint N)
-if (N > 1)
+if (N > 0)
 {
 pure:
     /// Element array.
@@ -47,10 +48,13 @@ pure:
     alias u = x;
     alias s = x;
 
-    alias y = _get!(1);
-    alias g = y;
-    alias v = y;
-    alias t = y;
+    static if (N > 1)
+    {
+        alias y = _get!(1);
+        alias g = y;
+        alias v = y;
+        alias t = y;
+    }
 
     static if (N > 2)
     {
