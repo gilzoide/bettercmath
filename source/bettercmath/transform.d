@@ -3,7 +3,6 @@ module bettercmath.transform;
 import bettercmath.cmath : cos, sin;
 import bettercmath.matrix;
 import bettercmath.misc : FloatType, degreesToRadians;
-import bettercmath.vector;
 
 @nogc @safe pure nothrow:
 
@@ -98,27 +97,27 @@ if (Dim > 0)
         return this;
     }
 
-    static Transform fromTranslation(uint N)(const Vector!(T, N) values)
+    static Transform fromTranslation(uint N)(const T[N] values)
     if (N <= Dim)
     {
         Transform t;
         t[$-1][0 .. N] = values[];
         return t;
     }
-    ref Transform translate(uint N)(const Vector!(T, N) values)
+    ref Transform translate(uint N)(const T[N] values)
     if (N <= Dim)
     {
         this[$-1][0 .. N] += values[];
         return this;
     }
-    Transform translated(uint N)(const Vector!(T, N) values) const
+    Transform translated(uint N)(const T[N] values) const
     if (N <= Dim)
     {
         Transform t = this;
         return t.translate(values);
     }
 
-    static Transform fromScaling(uint N)(const Vector!(T, N) values)
+    static Transform fromScaling(uint N)(const T[N] values)
     if (N <= Dim)
     {
         Transform t;
@@ -128,18 +127,18 @@ if (Dim > 0)
         }
         return t;
     }
-    ref Transform scale(uint N)(const Vector!(T, N) values)
+    ref Transform scale(uint N)(const T[N] values)
     if (N <= Dim)
     {
         return this.combine(CompactTransform.fromScaling(values));
     }
-    Transform scaled(uint N)(const Vector!(T, N) values) const
+    Transform scaled(uint N)(const T[N] values) const
     {
         Transform t = this;
         return t.scale(values);
     }
 
-    static Transform fromShearing(uint N)(const Vector!(T, N) values)
+    static Transform fromShearing(uint N)(const T[N] values)
     if (N <= Dim)
     {
         Transform t;
@@ -155,12 +154,12 @@ if (Dim > 0)
         }
         return t;
     }
-    ref Transform shear(uint N)(const Vector!(T, N) values)
+    ref Transform shear(uint N)(const T[N] values)
     if (N <= Dim)
     {
         return this.combine(CompactTransform.fromShearing(values));
     }
-    Transform sheared(uint N)(const Vector!(T, N) values) const
+    Transform sheared(uint N)(const T[N] values) const
     if (N <= Dim)
     {
         Transform t = this;
