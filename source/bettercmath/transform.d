@@ -92,6 +92,12 @@ if (Dim > 0)
         this.matrix = matrix;
     }
 
+    ref Transform setIdentity()
+    {
+        this = identity;
+        return this;
+    }
+
     static Transform fromTranslation(uint N)(const Vector!(T, N) values)
     if (N <= Dim)
     {
