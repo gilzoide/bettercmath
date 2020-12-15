@@ -236,15 +236,28 @@ if (Dim > 0)
             t[1, 2] = s; t[2, 2] = c;
             return t;
         }
+        static auto fromXRotationDegrees(const FT degrees)
+        {
+            return fromXRotation(degreesToRadians(degrees));
+        }
         ref Transform rotateX(const FT angle)
         {
             return this.combine(CompactTransform.fromXRotation(angle));
+        }
+        auto rotateXDegrees(const FT degrees)
+        {
+            return rotateX(degreesToRadians(degrees));
         }
         Transform rotatedX(const FT angle) const
         {
             Transform t = this;
             return t.rotateX(angle);
         }
+        auto rotatedXDegrees(const FT degrees)
+        {
+            return rotatedX(degreesToRadians(degrees));
+        }
+
 
         static Transform fromYRotation(const FT angle)
         {
@@ -254,29 +267,35 @@ if (Dim > 0)
             t[0, 2] = -s; t[2, 2] = c;
             return t;
         }
+        static auto fromYRotationDegrees(const FT degrees)
+        {
+            return fromYRotation(degreesToRadians(degrees));
+        }
         ref Transform rotateY(const FT angle)
         {
             return this.combine(CompactTransform.fromYRotation(angle));
+        }
+        auto rotateYDegrees(const FT degrees)
+        {
+            return rotateY(degreesToRadians(degrees));
         }
         Transform rotatedY(const FT angle) const
         {
             Transform t = this;
             return t.rotateY(angle);
         }
+        auto rotatedYDegrees(const FT degrees)
+        {
+            return rotatedY(degreesToRadians(degrees));
+        }
 
         // Rotating in Z is the same as rotating in 2D
-        static Transform fromZRotation(const FT angle)
-        {
-            return fromRotation(angle);
-        }
-        ref Transform rotateZ(const FT angle)
-        {
-            return rotate(angle);
-        }
-        Transform rotatedY(const FT angle) const
-        {
-            return rotated(angle);
-        }
+        alias fromZRotation = fromRotation;
+        alias fromZRotationDegrees = fromRotationDegrees;
+        alias rotateZ = rotate;
+        alias rotateZDegrees = rotateDegrees;
+        alias rotatedZ = rotated;
+        alias rotatedZDegrees = rotatedDegrees;
     }
 }
 
