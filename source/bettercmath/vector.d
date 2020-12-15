@@ -301,12 +301,12 @@ pure:
         assert(cast(Vec2i) floatVec == intVec);
     }
 
-    ref Vector opOpAssign(string op)(const T scalar)
+    ref Vector opOpAssign(string op)(const T scalar) return
     {
         mixin(q{elements = elements[]} ~ op ~ q{scalar;});
         return this;
     }
-    ref Vector opOpAssign(string op)(const Vector other)
+    ref Vector opOpAssign(string op)(const Vector other) return
     {
         mixin(q{elements = elements[]} ~ op ~ q{other[];});
         return this;

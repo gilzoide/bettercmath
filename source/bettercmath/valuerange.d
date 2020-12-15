@@ -27,7 +27,7 @@ struct ValueRange(T)
         to = values[1];
     }
 
-    ref ValueRange invert()
+    ref ValueRange invert() return
     {
         import std.algorithm : swap;
         swap(from, to);

@@ -190,7 +190,7 @@ if (_numColumns > 0 && _numRows > 0)
         }
         enum identity = makeIdentity();
 
-        ref Matrix opOpAssign(string op : "*")(const Matrix other)
+        ref Matrix opOpAssign(string op : "*")(const Matrix other) return
         {
             foreach (i; 0 .. numRows)
             {

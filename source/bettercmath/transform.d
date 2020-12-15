@@ -92,7 +92,7 @@ if (Dim > 0)
         this.matrix = matrix;
     }
 
-    ref Transform setIdentity()
+    ref Transform setIdentity() return
     {
         this = identity;
         return this;
@@ -130,7 +130,7 @@ if (Dim > 0)
         t[$-1][0 .. N] = values[];
         return t;
     }
-    ref Transform translate(uint N)(const T[N] values)
+    ref Transform translate(uint N)(const T[N] values) return
     if (N <= Dim)
     {
         this[$-1][0 .. N] += values[];
@@ -153,7 +153,7 @@ if (Dim > 0)
         }
         return t;
     }
-    ref Transform scale(uint N)(const T[N] values)
+    ref Transform scale(uint N)(const T[N] values) return
     if (N <= Dim)
     {
         return this.combine(CompactTransform.fromScaling(values));
@@ -180,7 +180,7 @@ if (Dim > 0)
         }
         return t;
     }
-    ref Transform shear(uint N)(const T[N] values)
+    ref Transform shear(uint N)(const T[N] values) return
     if (N <= Dim)
     {
         return this.combine(CompactTransform.fromShearing(values));
@@ -207,7 +207,7 @@ if (Dim > 0)
         {
             return fromRotation(degreesToRadians(degrees));
         }
-        ref Transform rotate(const FT angle)
+        ref Transform rotate(const FT angle) return
         {
             return this.combine(CompactTransform.fromRotation(angle));
         }
@@ -240,7 +240,7 @@ if (Dim > 0)
         {
             return fromXRotation(degreesToRadians(degrees));
         }
-        ref Transform rotateX(const FT angle)
+        ref Transform rotateX(const FT angle) return
         {
             return this.combine(CompactTransform.fromXRotation(angle));
         }
@@ -271,7 +271,7 @@ if (Dim > 0)
         {
             return fromYRotation(degreesToRadians(degrees));
         }
-        ref Transform rotateY(const FT angle)
+        ref Transform rotateY(const FT angle) return
         {
             return this.combine(CompactTransform.fromYRotation(angle));
         }
