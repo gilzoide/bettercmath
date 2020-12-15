@@ -1,14 +1,12 @@
 module bettercmath.matrix;
 
-import std.math : PI;
 import std.traits : isFloatingPoint;
-
-import bettercmath.vector;
 
 @safe @nogc pure nothrow:
 
 version (unittest)
 {
+    import bettercmath.vector;
     private alias Vec2 = Vector!(float, 2);
     private alias Vec3 = Vector!(float, 3);
     private alias Mat2 = Matrix!(float, 2);
@@ -113,7 +111,7 @@ if (_numColumns > 0 && _numRows > 0)
     {
         return Matrix(diag);
     }
-    static Matrix fromDiagonal(uint N)(const Vector!(T, N) diag)
+    static Matrix fromDiagonal(uint N)(const T[N] diag)
     if (N <= minDimension)
     {
         Matrix mat;
@@ -232,20 +230,26 @@ if (_numColumns > 0 && _numRows > 0)
         }
         alias ortho = orthographic;
 
+        static auto perspectiveDegrees(T fovDegrees, T aspectRatio, T near, T far)
+        {
+            import bettercmath.misc : degreesToRadians;
+            return perspective(degreesToRadians(fovDegrees), aspectRatio, near, far);
+        }
         static Matrix perspective(T fov, T aspectRatio, T near, T far)
+        in { assert(near > 0, "Near clipping pane should be positive"); assert(far > 0, "Far clipping pane should be positive"); }
+        do
         {
             // See https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml
             Matrix result;
 
             import bettercmath.cmath : tan;
-            T cotangent = 1.0 / tan(fov * (PI / 360.0));
+            T cotangent = 1.0 / tan(fov * 0.5);
 
             result[0, 0] = cotangent / aspectRatio;
             result[1, 1] = cotangent;
             result[2, 3] = -1.0;
             result[2, 2] = (near + far) / (near - far);
             result[3, 2] = (2.0 * near * far) / (near - far);
-            result[3, 3] = 0.0;
 
             return result;
         }
