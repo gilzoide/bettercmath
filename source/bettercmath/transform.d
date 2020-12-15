@@ -226,7 +226,7 @@ if (Dim > 0)
         }
     }
     // 3D transforms
-    else static if (Dim >= 3)
+    static if (Dim >= 3)
     {
         static Transform fromXRotation(const FT angle)
         {
