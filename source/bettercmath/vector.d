@@ -1,6 +1,7 @@
 module bettercmath.vector;
 
-import std.algorithm : among, sum;
+import std.algorithm : among, copy, sum;
+import std.range;
 import std.traits : isFloatingPoint;
 
 import bettercmath.cmath;
@@ -113,21 +114,6 @@ pure:
         v = Vec2(1.0);
         v = Vec2(1.0f);
     }
-    /// Constructs a Vector with all elements initialized separetely
-    this(Args...)(const Args args)
-    if (args.length == N)
-    {
-        elements = [args];
-    }
-    unittest
-    {
-        Vec2 v;
-        v = Vec2(1, 2);
-        v = Vec2(1, 2.0);
-        v = Vec2(1.0, 2);
-        v = Vec2(1.0, 2.0);
-        v = Vec2(1.0f, 2.0f);
-    }
     /// Constructs a Vector from static array.
     this(const T[N] values)
     {
@@ -139,6 +125,33 @@ pure:
         v = Vec2([1, 2]);
         v = Vec2([1.0, 2.0]);
         v = Vec2([1.0f, 2.0f]);
+    }
+    /// Constructs a Vector with elements from an Input Range
+    this(R)(auto ref R range)
+    if (isInputRange!R)
+    {
+        auto remainder = range.copy(elements[]);
+        remainder[] = 0;
+    }
+    unittest
+    {
+        assert(Vec4(iota(4)) == [0, 1, 2, 3]);
+        assert(Vec4(iota(8).stride(2)) == [0, 2, 4, 6]);
+    }
+    /// Constructs a Vector with all elements initialized separetely
+    this(Args...)(const Args args)
+    if (args.length <= N)
+    {
+        this(only(args));
+    }
+    unittest
+    {
+        Vec2 v;
+        v = Vec2(1, 2);
+        v = Vec2(1, 2.0);
+        v = Vec2(1.0, 2);
+        v = Vec2(1.0, 2.0);
+        v = Vec2(1.0f, 2.0f);
     }
 
     /// Vector with all zeros
@@ -316,6 +329,17 @@ pure:
 
 /// True if `T` is some kind of Vector
 enum isVector(T) = is(T : Vector!U, U...);
+
+Vector!(T, N) vector(T, uint N)(const T[N] elements)
+{
+    return typeof(return)(elements);
+}
+unittest
+{
+    auto v = [1, 2, 3].vector;
+    assert(v.elements == [1, 2, 3]);
+    assert(is(typeof(v) == Vector!(int, 3)));
+}
 
 pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 {
