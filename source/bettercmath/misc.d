@@ -31,5 +31,9 @@ alias rad2deg = radiansToDegrees;
 
 T lerp(T, U)(const T from, const T to, const U amount)
 {
-    return from + amount * (to - from);
+    return cast(T) (from + amount * (to - from));
+}
+T lerp(T, U)(const T[2] fromTo, const U amount)
+{
+    return lerp(fromTo[0], fromTo[1], amount);
 }
