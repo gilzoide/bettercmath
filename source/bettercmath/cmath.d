@@ -71,6 +71,29 @@ static foreach (f; functions)
     mixin(q{alias } ~ f ~ q{ = MathFunc!} ~ "\"" ~ f ~ "\";");
 }
 
+private enum constants = AliasSeq!(
+    "E", 
+    "PI", 
+    "PI_2", 
+    "PI_4", 
+    "M_1_PI", 
+    "M_2_PI", 
+    "M_2_SQRTPI", 
+    "LN10", 
+    "LN2", 
+    "LOG2", 
+    "LOG2E", 
+    "LOG2T", 
+    "LOG10E", 
+    "SQRT2", 
+    "SQRT1_2",
+);
+
+static foreach (c; constants)
+{
+    mixin(q{alias } ~ c ~ q{ = MathConst!} ~ "\"" ~ c ~ "\";");
+}
+
 // Private helpers for templated math function calls
 private string cfuncname(T : double, string f)()
 {
@@ -113,3 +136,8 @@ private struct MathFunc(string f)
     }
 }
 
+private template MathConst(string c)
+{
+    private alias dconst = __traits(getMember, dmath, c);
+    enum MathConst(T = real) = cast(FloatType!T) dconst;
+}
