@@ -121,6 +121,7 @@ pure:
 struct Hex(T = int)
 {
 pure:
+    alias ElementType = T;
     /// Axial coordinates, see https://www.redblobgames.com/grids/hexagons/implementation.html
     private Vector!(T, 2) _coordinates;
     @property const(typeof(_coordinates)) coordinates() const

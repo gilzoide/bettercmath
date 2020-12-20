@@ -27,6 +27,8 @@ struct Vector(T, uint N)
 if (N > 0)
 {
 pure:
+    alias ElementType = T;
+    enum dimension = N;
     /// Element array.
     T[N] elements = 0;
     alias elements this;
@@ -137,6 +139,7 @@ pure:
     {
         assert(Vec4(iota(4)) == [0, 1, 2, 3]);
         assert(Vec4(iota(8).stride(2)) == [0, 2, 4, 6]);
+        assert(Vec4(iota(3)) == [0, 1, 2, 0]);
     }
     /// Constructs a Vector with all elements initialized separetely
     this(Args...)(const Args args)

@@ -9,6 +9,8 @@ import bettercmath.misc : FloatType, degreesToRadians;
 struct Transform(T, uint Dim, bool _isCompact = false)
 if (Dim > 0)
 {
+    alias ElementType = T;
+    enum dimension = Dim;
     enum isCompact = _isCompact;
     static if (!isCompact)
     {

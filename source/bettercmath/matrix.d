@@ -22,6 +22,7 @@ struct Matrix(T, uint _numColumns, uint _numRows = _numColumns)
 if (_numColumns > 0 && _numRows > 0)
 {
     import std.algorithm : min;
+    alias ElementType = T;
     enum numColumns = _numColumns;
     enum numRows = _numRows;
     enum minDimension = min(numColumns, numRows);

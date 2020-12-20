@@ -14,6 +14,7 @@ T remap(T)(const T value, const ValueRange!T input, const ValueRange!T output)
 
 struct ValueRange(T)
 {
+    alias ElementType = T;
     T from = 0, to = 1;
 
     this(const T from, const T to)
