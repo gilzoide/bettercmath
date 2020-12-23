@@ -5,6 +5,11 @@ import bettercmath.cmath;
 // Easings based on https://easings.net/
 // and this implementation: https://github.com/warrenm/AHEasing/
 
+private T squared(T)(const T p)
+{
+    return p * p;
+}
+
 // Modeled after the line y = x
 auto linear(T)(const T p)
 {
@@ -185,14 +190,14 @@ alias easeInOutCirc = easeInOutCircular;
 // Modeled after the exponential function y = 2^(10(x - 1))
 auto easeInExponential(T)(const T p)
 {
-	return (p == 0.0) ? p : pow(2, 10 * (p - 1));
+	return (p == 0.0) ? p : squared(10 * (p - 1));
 }
 alias easeInExpo = easeInExponential;
 
 // Modeled after the exponential function y = -2^(-10x) + 1
 auto easeOutExponential(T)(const T p)
 {
-	return (p == 1.0) ? p : 1 - pow(2, -10 * p);
+	return (p == 1.0) ? p : 1 - squared(-10 * p);
 }
 alias easeOutExpo = easeOutExponential;
 
@@ -205,11 +210,11 @@ auto easeInOutExponential(T)(const T p)
 	
 	if(p < 0.5)
 	{
-		return 0.5 * pow(2, (20 * p) - 10);
+		return 0.5 * squared((20 * p) - 10);
 	}
 	else
 	{
-		return -0.5 * pow(2, (-20 * p) + 10) + 1;
+		return -0.5 * squared((-20 * p) + 10) + 1;
 	}
 }
 alias easeInOutExpo = easeInOutExponential;
@@ -217,13 +222,13 @@ alias easeInOutExpo = easeInOutExponential;
 // Modeled after the damped sine wave y = sin(13pi/2*x)*pow(2, 10 * (x - 1))
 auto easeInElastic(T)(const T p)
 {
-	return sin(13 * PI_2!T * p) * pow(2, 10 * (p - 1));
+	return sin(13 * PI_2!T * p) * squared(10 * (p - 1));
 }
 
 // Modeled after the damped sine wave y = sin(-13pi/2*(x + 1))*pow(2, -10x) + 1
 auto easeOutElastic(T)(const T p)
 {
-	return sin(-13 * PI_2!T * (p + 1)) * pow(2, -10 * p) + 1;
+	return sin(-13 * PI_2!T * (p + 1)) * squared(-10 * p) + 1;
 }
 
 // Modeled after the piecewise exponentially-damped sine wave:
@@ -233,11 +238,11 @@ auto easeInOutElastic(T)(const T p)
 {
 	if(p < 0.5)
 	{
-		return 0.5 * sin(13 * PI_2!T * (2 * p)) * pow(2, 10 * ((2 * p) - 1));
+		return 0.5 * sin(13 * PI_2!T * (2 * p)) * squared(10 * ((2 * p) - 1));
 	}
 	else
 	{
-		return 0.5 * (sin(-13 * PI_2!T * ((2 * p - 1) + 1)) * pow(2, -10 * (2 * p - 1)) + 2);
+		return 0.5 * (sin(-13 * PI_2!T * ((2 * p - 1) + 1)) * squared(-10 * (2 * p - 1)) + 2);
 	}
 }
 
