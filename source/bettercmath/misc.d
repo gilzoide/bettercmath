@@ -17,22 +17,26 @@ if (isNumeric!T)
     }
 }
 
-FloatType!T degreesToRadians(T)(T degrees)
+/// Convert angle from degrees to radians.
+FloatType!T degreesToRadians(T)(const T degrees)
 {
     return degrees * (PI / 180.0);
 }
 alias deg2rad = degreesToRadians;
 
-FloatType!T radiansToDegrees(T)(T radians)
+/// Convert angle from radias to degrees.
+FloatType!T radiansToDegrees(T)(const T radians)
 {
-    return radias * (180.0 / PI);
+    return radians * (180.0 / PI);
 }
 alias rad2deg = radiansToDegrees;
 
+/// Linearly interpolates values `from` and `to` by `amount`.
 T lerp(T, U)(const T from, const T to, const U amount)
 {
     return cast(T) (from + amount * (to - from));
 }
+/// Linearly interpolates the values from `fromTo` by `amount`.
 T lerp(T, U)(const T[2] fromTo, const U amount)
 {
     return lerp(fromTo[0], fromTo[1], amount);

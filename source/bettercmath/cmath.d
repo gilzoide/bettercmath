@@ -68,7 +68,7 @@ private enum functions = AliasSeq!(
 
 static foreach (f; functions)
 {
-    mixin(q{alias } ~ f ~ q{ = MathFunc!} ~ "\"" ~ f ~ "\";");
+    mixin(q{alias } ~ f ~ q{ = MathFunc!} ~ "\"" ~ f ~ "\".opCall;");
 }
 
 private enum constants = AliasSeq!(
@@ -107,12 +107,18 @@ private string cfuncname(T : float, string f)()
 {
     return f ~ "f";
 }
-private string cfuncname(T : int, string f)()
+private string cfuncname(T : long, string f)()
 {
     return f ~ "f";
 }
 
-private struct MathFunc(string f)
+/++
+ + Template wrapper for standard library math functions.
+ + 
+ + On CTFE, calls the D runtime math (std.math) functions.
+ + On runtime, calls the right variant of the C runtime math (core.stdc.math) functions.
+ +/
+template MathFunc(string f)
 {
     template opCall(T, Args...)
     {
@@ -120,7 +126,7 @@ private struct MathFunc(string f)
         private alias dfunc = __traits(getMember, dmath, f);
         private alias cfunc = __traits(getMember, cmath, cfuncname!(T, f)());
 
-        nothrow @nogc static ReturnType!cfunc opCall(T arg1, Args args)
+        nothrow @nogc ReturnType!cfunc opCall(T arg1, Args args)
         {
             if (__ctfe)
             {
@@ -136,6 +142,7 @@ private struct MathFunc(string f)
     }
 }
 
+/// Template wrapper for typed versions of the standard library math constants.
 private template MathConst(string c)
 {
     private alias dconst = __traits(getMember, dmath, c);
