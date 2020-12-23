@@ -20,13 +20,13 @@ version (unittest)
 }
 
 
-/++
- + Generic Vector backed by a static array.
- + 
- + Params:
- +   T = Element type
- +   N = Vector dimension, must be positive
- +/
+/**
+ * Generic Vector backed by a static array.
+ * 
+ * Params:
+ *   T = Element type
+ *   N = Vector dimension, must be positive
+ */
 struct Vector(T, uint N)
 if (N > 0)
 {

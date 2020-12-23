@@ -1,3 +1,6 @@
+/**
+ * Type generic standard math functions and constants.
+ */
 module bettercmath.cmath;
 
 import cmath = core.stdc.math;
@@ -112,12 +115,12 @@ private string cfuncname(T : long, string f)()
     return f ~ "f";
 }
 
-/++
- + Template wrapper for standard library math functions.
- + 
- + On CTFE, calls the D runtime math (std.math) functions.
- + On runtime, calls the right variant of the C runtime math (core.stdc.math) functions.
- +/
+/**
+ * Template wrapper for standard library math functions.
+ * 
+ * On CTFE, calls the D runtime math (std.math) functions.
+ * On runtime, calls the right variant of the C runtime math (core.stdc.math) functions.
+ */
 template MathFunc(string f)
 {
     template opCall(T, Args...)
