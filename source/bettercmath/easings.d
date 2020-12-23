@@ -308,3 +308,67 @@ auto easeInOutBounce(T)(const T p)
 	}
 }
 
+template Easing(T)
+{
+    alias linear = .linear!T;
+
+    alias easeInQuadratic = .easeInQuadratic!T;
+    alias easeInQuad = easeInQuadratic;
+    alias easeOutQuadratic = .easeOutQuadratic!T;
+    alias easeOutQuad = easeOutQuadratic;
+    alias easeInOutQuadratic = .easeInOutQuadratic!T;
+    alias easeInOutQuad = easeInOutQuadratic;
+
+    alias easeInCubic = .easeInCubic!T;
+    alias easeOutCubic = .easeOutCubic!T;
+    alias easeInOutCubic = .easeInOutCubic!T;
+
+    alias easeInQuartic = .easeInQuartic!T;
+    alias easeInQuart = easeInQuartic;
+    alias easeOutQuartic = .easeOutQuartic!T;
+    alias easeOutQuart = easeOutQuartic;
+    alias easeInOutQuartic = .easeInOutQuartic!T;
+    alias easeInOutQuart = easeInOutQuartic;
+
+    alias easeInQuintic = .easeInQuintic!T;
+    alias easeInQuint= easeInQuintic;
+    alias easeOutQuintic = .easeOutQuintic!T;
+    alias easeOutQuint= easeOutQuintic;
+    alias easeInOutQuintic = .easeInOutQuintic!T;
+    alias easeInOutQuint= easeInOutQuintic;
+
+    alias easeInSine = .easeInSine!T;
+    alias easeOutSine = .easeOutSine!T;
+    alias easeInOutSine = .easeInOutSine!T;
+
+    alias easeInCircular = .easeInCircular!T;
+    alias easeInCirc = easeInCircular;
+    alias easeOutCircular = .easeOutCircular!T;
+    alias easeOutCirc = easeOutCircular;
+    alias easeInOutCircular = .easeInOutCircular!T;
+    alias easeInOutCirc = easeInOutCircular;
+
+    alias easeInExponential = .easeInExponential!T;
+    alias easeInExpo = easeInExponential;
+    alias easeOutExponential = .easeOutExponential!T;
+    alias easeOutExpo = easeOutExponential;
+    alias easeInOutExponential = .easeInOutExponential!T;
+    alias easeInOutExpo = easeInOutExponential;
+
+    alias easeInElastic = .easeInElastic!T;
+    alias easeOutElastic = .easeOutElastic!T;
+    alias easeInOutElastic = .easeInOutElastic!T;
+
+    alias easeInBack = .easeInBack!T;
+    alias easeOutBack = .easeOutBack!T;
+    alias easeInOutBack = .easeInOutBack!T;
+
+    alias easeInBounce = .easeInBounce!T;
+    alias easeOutBounce = .easeOutBounce!T;
+    alias easeInOutBounce = .easeInOutBounce!T;
+
+    auto named(string name)()
+    {
+        mixin("return &" ~ name ~ ";");
+    }
+}
