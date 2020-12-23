@@ -1,6 +1,6 @@
 module bettercmath.vector;
 
-import std.algorithm : among, copy, sum;
+import std.algorithm : among, copy, max, min, sum;
 import std.range;
 import std.traits : isFloatingPoint;
 
@@ -21,13 +21,18 @@ version (unittest)
 
 
 /++
- + TODO: doc
+ + Generic Vector backed by a static array.
+ + 
+ + Params:
+ +   T = Element type
+ +   N = Vector dimension, must be positive
  +/
 struct Vector(T, uint N)
 if (N > 0)
 {
 pure:
     alias ElementType = T;
+    /// Vector dimension.
     enum dimension = N;
     /// Element array.
     T[N] elements = 0;
@@ -58,7 +63,6 @@ pure:
         alias v = y;
         alias t = y;
     }
-
     static if (N > 2)
     {
         alias z = _get!(2);
@@ -163,7 +167,7 @@ pure:
     /// Vector with all ones
     enum Vector ones = 1;
 
-    // Operators
+    /// Returns a new vector with unary operator applied to all elements
     Vector opUnary(string op)() const
     if (op.among("-", "+", "~"))
     {
@@ -176,6 +180,7 @@ pure:
         assert(-Vec2(1, -2) == [-1, 2]);
     }
 
+    /// Returns a new vector with binary operator applied to all elements and `scalar`
     Vector opBinary(string op)(const T scalar) const
     if (!op.among("~", "<<", ">>", ">>>"))
     {
@@ -198,8 +203,9 @@ pure:
         assert((b | 1) == [1 | 1, 2 | 1]);
         assert((b ^ 1) == [1 ^ 1, 2 ^ 1]);
     }
-    /// TODO: shift operations
+    // TODO: shift operations
 
+    /// Ditto
     Vector opBinaryRight(string op)(const T scalar) const
     if (!op.among("~", "<<", ">>", ">>>"))
     {
@@ -223,11 +229,22 @@ pure:
         assert((1 ^ b) == [1 ^ 1, 1 ^ 2]);
     }
 
-    Vector opBinary(string op)(const Vector other) const
+    /// Returns a new vector with the results of applying operator against elements of `other`.
+    /// If operands dimensions are unequal, copies the values from greater dimension vector.
+    Vector!(T, max(N, M)) opBinary(string op, uint M)(const T[M] other) const
     if (op != "~")
     {
-        Vector result;
-        mixin(q{result = elements[]} ~ op ~ q{other.elements[];});
+        enum minDimension = min(N, M);
+        typeof(return) result;
+        mixin(q{result[0 .. minDimension] = elements[0 .. minDimension]} ~ op ~ q{other[0 .. minDimension];});
+        static if (M < N)
+        {
+            result[minDimension .. N] = elements[minDimension .. N];
+        }
+        else static if (N < M)
+        {
+            result[minDimension .. M] = other[minDimension .. M];
+        }
         return result;
     }
     unittest
@@ -236,8 +253,20 @@ pure:
         assert(Vec2(1, 2) - Vec2(3, 4) == [1f-3f, 2f-4f]);
         assert(Vec2(1, 2) * Vec2(3, 4) == [1f*3f, 2f*4f]);
         assert(Vec2(1, 2) / Vec2(3, 4) == [1f/3f, 2f/4f]);
+        assert(__traits(compiles, Vec2(1, 2) + [3, 4]));
+
+        assert(Vec2(1, 2) + Vec1(3) == [1f+3f, 2f]);
+        assert(Vec2(1, 2) - Vec1(3) == [1f-3f, 2f]);
+        assert(Vec2(1, 2) * Vec1(3) == [1f*3f, 2f]);
+        assert(Vec2(1, 2) / Vec1(3) == [1f/3f, 2f]);
+
+        assert(Vec2(1, 2) + Vec3(3, 4, 5) == [1f+3f, 2f+4f, 5f]);
+        assert(Vec2(1, 2) - Vec3(3, 4, 5) == [1f-3f, 2f-4f, 5f]);
+        assert(Vec2(1, 2) * Vec3(3, 4, 5) == [1f*3f, 2f*4f, 5f]);
+        assert(Vec2(1, 2) / Vec3(3, 4, 5) == [1f/3f, 2f/4f, 5f]);
     }
 
+    /// Returns a new vector of greater dimension by copying elements and appending `scalar`.
     Vector!(T, N + 1) opBinary(string op : "~")(const T scalar) const
     {
         typeof(return) result;
@@ -250,6 +279,7 @@ pure:
         Vec2 v = [1, 2];
         assert(v ~ 3 == Vec3(1, 2, 3));
     }
+    /// Returns a new vector of greater dimension by copying elements and prepending `scalar`.
     Vector!(T, N + 1) opBinaryRight(string op : "~")(const T scalar) const
     {
         typeof(return) result;
@@ -264,6 +294,7 @@ pure:
         assert(0 ~ v == Vec3(0, 1, 2));
     }
 
+    /// Returns a new vector of greater dimension by copying elements and appending values from `other`.
     Vector!(T, N + M) opBinary(string op : "~", M)(T[M] other) const
     {
         typeof(return) result = elements ~ other;
@@ -275,6 +306,7 @@ pure:
         assert(v1 ~ [3f, 4f] == Vec4(1, 2, 3, 4));
         assert(v1 ~ Vec2(3f, 4f) == Vec4(1, 2, 3, 4));
     }
+    /// Returns a new vector of greater dimension by copying elements and prepending values from `other`.
     Vector!(T, N + M) opBinaryRight(string op : "~", M)(T[M] other) const
     {
         typeof(return) result = other ~ elements;
@@ -287,6 +319,7 @@ pure:
         assert(Vec2(3f, 4f) ~ v1 == Vec4(3, 4, 1, 2));
     }
 
+    /// Cast to a vector of same dimensions, but different element type.
     Vector!(T2, N) opCast(U : Vector!(T2, N), T2)() const
     {
         typeof(return) result;
@@ -304,15 +337,33 @@ pure:
         assert(cast(Vec2i) floatVec == intVec);
     }
 
+    /// Assign result of applying operator with `scalar` to elements.
     ref Vector opOpAssign(string op)(const T scalar) return
     {
-        mixin(q{elements = elements[]} ~ op ~ q{scalar;});
+        mixin(q{elements[] } ~ op ~ q{= scalar;});
         return this;
     }
-    ref Vector opOpAssign(string op)(const Vector other) return
+    unittest
     {
-        mixin(q{elements = elements[]} ~ op ~ q{other[];});
+        Vec2 v = [1, 2];
+        v += 5;
+        assert(v == [6, 7]);
+    }
+    /// Assign result of applying operator with `other` to elements.
+    ref Vector opOpAssign(string op, uint M)(const T[M] other) return
+    {
+        enum minDimension = min(N, M);
+        mixin(q{elements[0 .. minDimension] } ~ op ~ q{= other[0 .. minDimension];});
         return this;
+    }
+    unittest
+    {
+        Vec3 v = [1, 2, 3];
+        v += Vec2(1, 2);
+        assert(v == [2, 4, 3]);
+
+        v += Vec4(1, 2, 3, 4);
+        assert(v == [3, 6, 6]);
     }
 
     unittest
@@ -333,6 +384,7 @@ pure:
 /// True if `T` is some kind of Vector
 enum isVector(T) = is(T : Vector!U, U...);
 
+/// Construct Vector directly from static array, inferring element type.
 Vector!(T, N) vector(T, uint N)(const T[N] elements)
 {
     return typeof(return)(elements);
@@ -344,12 +396,14 @@ unittest
     assert(is(typeof(v) == Vector!(int, 3)));
 }
 
+/// Returns the dot product between two Vectors.
 pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
 {
     auto multiplied = a * b;
     return multiplied[].sum;
 }
 
+/// Returns the cross product between two 3D Vectors.
 pure Vector!(T, 3) cross(T)(const Vector!(T, 3) a, const Vector!(T, 3) b)
 {
     typeof(return) result = [
@@ -360,11 +414,13 @@ pure Vector!(T, 3) cross(T)(const Vector!(T, 3) a, const Vector!(T, 3) b)
     return result;
 }
 
+/// Returns a Vector that is the reflection of `vec` against `normal`.
 pure Vector!(T, N) reflect(T, uint N)(const Vector!(T, N) vec, const Vector!(T, N) normal)
 {
     return vec - (2 * normal * dot(vec, normal));
 }
 
+/// Returns the squared magnitude (Euclidean length) of a Vector.
 pure T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
 out (r) { assert(r >= 0, "Vector squared magnitude should be non-negative!"); }
 do
@@ -381,6 +437,7 @@ unittest
     assert(Vec2(1, 2).magnitudeSquared() == 5);
 }
 
+/// Returns the magnitude (Euclidean length) of a Vector.
 auto magnitude(T, uint N)(const Vector!(T, N) vec)
 out (r) { assert(r >= 0, "Vector magnitude should be non-negative!"); }
 do
@@ -414,6 +471,7 @@ unittest
     assert(v.map!(x => x + 1) == Vec3(-1 + 1, 2.5 + 1, -3 + 1));
 }
 
+/// Normalize a Vector inplace.
 ref Vector!(T, N) normalize(T, uint N)(ref return Vector!(T, N) vec)
 {
     auto sqMag = vec.magnitudeSquared();
@@ -432,11 +490,11 @@ unittest
     assert(v == Vec2(1, 0));
 }
 
+/// Returns a normalized copy of Vector.
 Vector!(T, N) normalized(T, uint N)(const Vector!(T, N) vec)
 {
     typeof(return) copy = vec;
-    copy.normalize();
-    return copy;
+    return copy.normalize();
 }
 unittest
 {
