@@ -1,3 +1,6 @@
+/**
+ * Type and dimension generic Matrix type.
+ */
 module bettercmath.matrix;
 
 @safe @nogc pure nothrow:
@@ -39,9 +42,9 @@ if (numColumns > 0 && numRows > 0)
     T[numElements] elements = 0;
 
     /// Constructs a Matrix specifying all elements.
-    this(const T[numElements] elements)
+    this()(const auto ref T[numElements] values)
     {
-        this.elements = elements;
+        this.elements = values;
     }
     /// Constructs a Matrix specifying the diagonal value.
     this(const T diag)
@@ -139,12 +142,12 @@ if (numColumns > 0 && numRows > 0)
         return Matrix([args]);
     }
     /// Constructs a Matrix from an array of all elements in column-major format.
-    static Matrix fromColumns(const auto ref T[numElements] elements)
+    static Matrix fromColumns()(const auto ref T[numElements] elements)
     {
         return Matrix(elements);
     }
     /// Constructs a Matrix from a 2D array of columns.
-    static Matrix fromColumns(const auto ref T[rowSize][columnSize] columns)
+    static Matrix fromColumns()(const auto ref T[rowSize][columnSize] columns)
     {
         return Matrix(cast(T[numElements]) columns);
     }
