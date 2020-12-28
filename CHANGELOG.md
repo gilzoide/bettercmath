@@ -10,7 +10,8 @@
 - `Transform.opCast` function to cast between Transform types
 
 ### Changed
-- Added `auto ref` to several Matrix and some Vector functions' arguments
+- Added `auto ref` to several Matrix and Vector functions' arguments
+- Changed `Vector.opCast` to accept `T2[N]` instead of `Vector!(T2, N)`
 
 ### Removed
 - Transform template compact parameter, in favor of `TransformOptions`

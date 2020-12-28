@@ -1,3 +1,6 @@
+/**
+ * Type and dimension generic Vector backed by a static array.
+ */
 module bettercmath.vector;
 
 import std.algorithm : among, copy, max, min, sum;
@@ -231,7 +234,7 @@ pure:
 
     /// Returns a new vector with the results of applying operator against elements of `other`.
     /// If operands dimensions are unequal, copies the values from greater dimension vector.
-    Vector!(T, max(N, M)) opBinary(string op, uint M)(const T[M] other) const
+    Vector!(T, max(N, M)) opBinary(string op, uint M)(const auto ref T[M] other) const
     if (op != "~")
     {
         enum minDimension = min(N, M);
@@ -295,7 +298,7 @@ pure:
     }
 
     /// Returns a new vector of greater dimension by copying elements and appending values from `other`.
-    Vector!(T, N + M) opBinary(string op : "~", M)(T[M] other) const
+    Vector!(T, N + M) opBinary(string op : "~", M)(const auto ref T[M] other) const
     {
         typeof(return) result = elements ~ other;
         return result;
@@ -307,7 +310,7 @@ pure:
         assert(v1 ~ Vec2(3f, 4f) == Vec4(1, 2, 3, 4));
     }
     /// Returns a new vector of greater dimension by copying elements and prepending values from `other`.
-    Vector!(T, N + M) opBinaryRight(string op : "~", M)(T[M] other) const
+    Vector!(T, N + M) opBinaryRight(string op : "~", M)(const auto ref T[M] other) const
     {
         typeof(return) result = other ~ elements;
         return result;
@@ -319,8 +322,8 @@ pure:
         assert(Vec2(3f, 4f) ~ v1 == Vec4(3, 4, 1, 2));
     }
 
-    /// Cast to a vector of same dimensions, but different element type.
-    Vector!(T2, N) opCast(U : Vector!(T2, N), T2)() const
+    /// Cast to a static array of same dimension, but different element type.
+    U opCast(U : T2[N], T2)() const
     {
         typeof(return) result;
         foreach (i; 0 .. N)
@@ -332,9 +335,12 @@ pure:
     unittest
     {
         Vec2i intVec = [1, 2];
-        Vec2 floatVec = cast(Vec2) intVec;
+        auto floatVec = cast(Vec2) intVec;
         assert(floatVec == Vec2(1f, 2f));
         assert(cast(Vec2i) floatVec == intVec);
+
+        auto floatArray = cast(float[2]) intVec;
+        assert(floatArray == [1f, 2f]);
     }
 
     /// Assign result of applying operator with `scalar` to elements.
@@ -350,7 +356,7 @@ pure:
         assert(v == [6, 7]);
     }
     /// Assign result of applying operator with `other` to elements.
-    ref Vector opOpAssign(string op, uint M)(const T[M] other) return
+    ref Vector opOpAssign(string op, uint M)(const auto ref T[M] other) return
     {
         enum minDimension = min(N, M);
         mixin(q{elements[0 .. minDimension] } ~ op ~ q{= other[0 .. minDimension];});
@@ -385,7 +391,7 @@ pure:
 enum isVector(T) = is(T : Vector!U, U...);
 
 /// Construct Vector directly from static array, inferring element type.
-Vector!(T, N) vector(T, uint N)(const T[N] elements)
+Vector!(T, N) vector(T, uint N)(const auto ref T[N] elements)
 {
     return typeof(return)(elements);
 }
@@ -397,14 +403,14 @@ unittest
 }
 
 /// Returns the dot product between two Vectors.
-pure T dot(T, uint N)(const Vector!(T, N) a, const Vector!(T, N) b)
+pure T dot(T, uint N)(const auto ref Vector!(T, N) a, const auto ref Vector!(T, N) b)
 {
     auto multiplied = a * b;
     return multiplied[].sum;
 }
 
 /// Returns the cross product between two 3D Vectors.
-pure Vector!(T, 3) cross(T)(const Vector!(T, 3) a, const Vector!(T, 3) b)
+pure Vector!(T, 3) cross(T)(const auto ref Vector!(T, 3) a, const auto ref Vector!(T, 3) b)
 {
     typeof(return) result = [
         a.y * b.z - a.z * b.y,
@@ -415,13 +421,13 @@ pure Vector!(T, 3) cross(T)(const Vector!(T, 3) a, const Vector!(T, 3) b)
 }
 
 /// Returns a Vector that is the reflection of `vec` against `normal`.
-pure Vector!(T, N) reflect(T, uint N)(const Vector!(T, N) vec, const Vector!(T, N) normal)
+pure Vector!(T, N) reflect(T, uint N)(const auto ref Vector!(T, N) vec, const auto ref Vector!(T, N) normal)
 {
     return vec - (2 * normal * dot(vec, normal));
 }
 
 /// Returns the squared magnitude (Euclidean length) of a Vector.
-pure T magnitudeSquared(T, uint N)(const Vector!(T, N) vec)
+pure T magnitudeSquared(T, uint N)(const auto ref Vector!(T, N) vec)
 out (r) { assert(r >= 0, "Vector squared magnitude should be non-negative!"); }
 do
 {
@@ -438,7 +444,7 @@ unittest
 }
 
 /// Returns the magnitude (Euclidean length) of a Vector.
-auto magnitude(T, uint N)(const Vector!(T, N) vec)
+auto magnitude(T, uint N)(const auto ref Vector!(T, N) vec)
 out (r) { assert(r >= 0, "Vector magnitude should be non-negative!"); }
 do
 {
@@ -453,7 +459,7 @@ unittest
     assert(Vec2(2, 0).magnitude() == 2);
 }
 
-Vector!(typeof(mapfunc(cast(T) 0)), N) map(alias mapfunc, T, uint N)(const Vector!(T, N) vec)
+Vector!(typeof(mapfunc(cast(T) 0)), N) map(alias mapfunc, T, uint N)(const auto ref Vector!(T, N) vec)
 {
     typeof(return) result;
     foreach (i; 0 .. N)
@@ -491,7 +497,7 @@ unittest
 }
 
 /// Returns a normalized copy of Vector.
-Vector!(T, N) normalized(T, uint N)(const Vector!(T, N) vec)
+Vector!(T, N) normalized(T, uint N)(const auto ref Vector!(T, N) vec)
 {
     typeof(return) copy = vec;
     return copy.normalize();
