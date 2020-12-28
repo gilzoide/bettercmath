@@ -121,7 +121,7 @@ pure:
         v = Vec2(1.0f);
     }
     /// Constructs a Vector from static array.
-    this(const T[N] values)
+    this()(const auto ref T[N] values)
     {
         elements = values;
     }
@@ -146,7 +146,7 @@ pure:
         assert(Vec4(iota(3)) == [0, 1, 2, 0]);
     }
     /// Constructs a Vector with all elements initialized separetely
-    this(Args...)(const Args args)
+    this(Args...)(const auto ref Args args)
     if (args.length <= N)
     {
         this(only(args));

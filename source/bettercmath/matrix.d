@@ -52,6 +52,37 @@ if (numColumns > 0 && numRows > 0)
         }
     }
 
+    /// Copy Matrix values into `target` Matrix of any dimensions.
+    /// If dimensions are not the same, the values at non-overlapping indices
+    /// are ignored.
+    auto ref copyInto(uint C, uint R)(ref return Matrix!(T, C, R) target) const
+    {
+        // If matrices have the same column size, underlying array may be copied at once
+        static if (this.columnSize == target.columnSize)
+        {
+            enum copySize = min(this.numElements, target.numElements);
+            target.elements[0 .. copySize] = this.elements[0 .. copySize];
+        }
+        else
+        {
+            enum columnCopySize = min(this.columnSize, target.columnSize);
+            enum rowCopySize = min(this.rowSize, target.rowSize);
+            foreach (i; 0 .. rowCopySize)
+            {
+                target[i][0 .. columnCopySize] = this[i][0 .. columnCopySize];
+            }
+        }
+        return target;
+    }
+
+    /// Returns a copy of Matrix, adjusting dimensions as necessary.
+    /// Non-overlapping indices will stay initialized to 0.
+    U opCast(U : Matrix!(T, C, R), uint C, uint R)() const
+    {
+        typeof(return) result;
+        return copyInto(result);
+    }
+
     /// Returns a Range of all columns.
     auto columns()
     {
@@ -97,35 +128,29 @@ if (numColumns > 0 && numRows > 0)
     }
 
     /// Row size
-    @property size_t opDollar(size_t pos : 0)() const
-    {
-        return rowSize;
-    }
+    enum opDollar(size_t pos : 0) = rowSize;
     /// Column size
-    @property size_t opDollar(size_t pos : 1)() const
-    {
-        return columnSize;
-    }
+    enum opDollar(size_t pos : 1) = columnSize;
 
     /// Constructs a Matrix from all elements in column-major format.
-    static Matrix fromColumns(Args...)(const Args args)
+    static Matrix fromColumns(Args...)(const auto ref Args args)
     if (args.length == numElements)
     {
         return Matrix([args]);
     }
     /// Constructs a Matrix from an array of all elements in column-major format.
-    static Matrix fromColumns(const T[numElements] elements)
+    static Matrix fromColumns(const auto ref T[numElements] elements)
     {
         return Matrix(elements);
     }
     /// Constructs a Matrix from a 2D array of columns.
-    static Matrix fromColumns(const T[rowSize][columnSize] columns)
+    static Matrix fromColumns(const auto ref T[rowSize][columnSize] columns)
     {
         return Matrix(cast(T[numElements]) columns);
     }
 
     /// Constructs a Matrix from row-major format
-    static Matrix fromRows(Args...)(const Args args)
+    static Matrix fromRows(Args...)(const auto ref Args args)
     {
         return Matrix!(T, columnSize, rowSize).fromColumns(args).transposed;
     }
@@ -136,7 +161,7 @@ if (numColumns > 0 && numRows > 0)
         return Matrix(diag);
     }
     /// Constructs a Matrix with diagonal values from `diag` and all others equal to 0.
-    static Matrix fromDiagonal(uint N)(const T[N] diag)
+    static Matrix fromDiagonal(uint N)(const auto ref T[N] diag)
     if (N <= minDimension)
     {
         Matrix mat;
@@ -149,7 +174,7 @@ if (numColumns > 0 && numRows > 0)
 
     /// Returns the result of multiplying `vec` by Matrix.
     /// If matrix is not square, the resulting array dimension will be different from input.
-    T[columnSize] opBinary(string op : "*")(const T[rowSize] vec) const
+    T[columnSize] opBinary(string op : "*")(const auto ref T[rowSize] vec) const
     {
         typeof(return) result;
         foreach (i; 0 .. columnSize)
@@ -175,7 +200,9 @@ if (numColumns > 0 && numRows > 0)
     }
 
     /// Returns the result of Matrix multiplication.
-    Matrix!(T, OtherColumns, columnSize) opBinary(string op : "*", uint OtherColumns)(const Matrix!(T, OtherColumns, rowSize) other) const
+    Matrix!(T, OtherColumns, columnSize) opBinary(string op : "*", uint OtherColumns)(
+        const auto ref Matrix!(T, OtherColumns, rowSize) other
+    ) const
     {
         typeof(return) result = void;
         foreach (i; 0 .. columnSize)
@@ -216,7 +243,7 @@ if (numColumns > 0 && numRows > 0)
         enum identity = fromDiagonal(1);
 
         /// Inplace matrix multiplication with "*=" operator, only available for square matrices.
-        ref Matrix opOpAssign(string op : "*")(const Matrix other) return
+        ref Matrix opOpAssign(string op : "*")(const auto ref Matrix other) return
         {
             foreach (i; 0 .. columnSize)
             {
@@ -233,7 +260,7 @@ if (numColumns > 0 && numRows > 0)
             return this;
         }
 
-        // TODO: inverse matrix, at least for 2x2, 3x3 and 4x4
+        // TODO: determinant, inverse matrix, at least for 2x2, 3x3 and 4x4
     }
 
 
@@ -313,7 +340,7 @@ unittest
 }
 
 /// Returns a transposed copy of `mat`.
-Matrix!(T, R, C) transposed(T, uint C, uint R)(const Matrix!(T, C, R) mat)
+Matrix!(T, R, C) transposed(T, uint C, uint R)(const auto ref Matrix!(T, C, R) mat)
 {
     typeof(return) newMat = void;
     foreach (i; 0 .. R)
