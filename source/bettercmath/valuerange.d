@@ -1,6 +1,7 @@
+/**
+ * Inclusive scalar value ranges for interpolating and remapping values.
+ */
 module bettercmath.valuerange;
-
-import bettercmath.misc : lerp;
 
 /// Remap `value` from the range [inputStart, inputEnd] to [outputStart, outputEnd].
 T remap(T)(const T value, const T inputStart, const T inputEnd, const T outputStart, const T outputEnd)
@@ -19,6 +20,7 @@ T remap(T)(const T value, const ValueRange!T input, const ValueRange!T output)
  */
 struct ValueRange(T)
 {
+    /// Alias for ValueRange element type.
     alias ElementType = T;
     /// Value that starts the range.
     T from = 0;
@@ -56,7 +58,8 @@ struct ValueRange(T)
     /// Linearly interpolates range by `amount`.
     T lerp(U)(const U amount) const
     {
-        return .lerp(from, to, amount);
+        import bettercmath.misc : lerp;
+        return lerp(from, to, amount);
     }
 
     /// Remap `value` from this range to `newRange`.

@@ -34,6 +34,7 @@ struct Vector(T, uint N)
 if (N > 0)
 {
 pure:
+    /// Alias for Vector element type.
     alias ElementType = T;
     /// Vector dimension.
     enum dimension = N;
@@ -54,50 +55,59 @@ pure:
         return elements[from .. to];
     }
 
+    /// Get a reference to first element.
     alias x = _get!(0);
-    alias r = x;
-    alias u = x;
-    alias s = x;
+    alias r = x;  /// ditto
+    alias u = x;  /// ditto
+    alias s = x;  /// ditto
 
     static if (N > 1)
     {
+        /// Get a reference to second element.
         alias y = _get!(1);
-        alias g = y;
-        alias v = y;
-        alias t = y;
+        alias g = y;  /// ditto
+        alias v = y;  /// ditto
+        alias t = y;  /// ditto
     }
     static if (N > 2)
     {
+        /// Get a reference to third element.
         alias z = _get!(2);
-        alias b = z;
-        alias p = z;
+        alias b = z;  /// ditto
+        alias p = z;  /// ditto
 
+        /// Get a reference to the first and second elements.
         alias xy = _slice!(0, 2);
-        alias rg = xy;
-        alias uv = xy;
-        alias st = xy;
+        alias rg = xy;  /// ditto
+        alias uv = xy;  /// ditto
+        alias st = xy;  /// ditto
 
+        /// Get a reference to the second and third elements.
         alias yz = _slice!(1, 3);
-        alias gb = yz;
-        alias tp = yz;
+        alias gb = yz;  /// ditto
+        alias tp = yz;  /// ditto
     }
     static if (N > 3)
     {
+        /// Get a reference to fourth element.
         alias w = _get!(3);
-        alias a = w;
-        alias q = w;
+        alias a = w;  /// ditto
+        alias q = w;  /// ditto
 
+        /// Get a reference to the third and fourth elements.
         alias zw = _slice!(2, 4);
-        alias ba = zw;
-        alias pq = zw;
+        alias ba = zw;  /// ditto
+        alias pq = zw;  /// ditto
 
+        /// Get a reference to the first, second and third elements.
         alias xyz = _slice!(0, 3);
-        alias rgb = xyz;
-        alias stp = xyz;
+        alias rgb = xyz;  /// ditto
+        alias stp = xyz;  /// ditto
 
+        /// Get a reference to the second, third and fourth elements.
         alias yzw = _slice!(1, 4);
-        alias gba = yzw;
-        alias tpq = yzw;
+        alias gba = yzw;  /// ditto
+        alias tpq = yzw;  /// ditto
     }
 
     unittest
@@ -109,6 +119,13 @@ pure:
         assert(v.y == v[1]);
         v.x = 2;
         assert(v.r == 2);
+
+        Vec4 v2 = [1, 2, 3, 4];
+        assert(v2.xy == [1, 2]);
+        assert(v2.yz == [2, 3]);
+        assert(v2.zw == [3, 4]);
+        v2.xyz = 0;
+        assert(v2 == [0, 0, 0, 4]);
     }
 
     /// Constructs a Vector with all elements equal to `scalar`

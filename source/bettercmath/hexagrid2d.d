@@ -1,3 +1,8 @@
+/**
+ * 2D hexagon grid math.
+ *
+ * See_Also: https://www.redblobgames.com/grids/hexagons/
+ */
 module bettercmath.hexagrid2d;
 
 import std.algorithm : among;
@@ -8,7 +13,6 @@ import bettercmath.vector;
 import bettercmath.matrix;
 import bettercmath.misc;
 
-/// Lots of ideas from https://www.redblobgames.com/grids/hexagons/
 @safe @nogc nothrow:
 
 private enum sqrt3 = sqrt(3);

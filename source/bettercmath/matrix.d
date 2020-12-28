@@ -26,6 +26,7 @@ struct Matrix(T, uint numColumns, uint numRows = numColumns)
 if (numColumns > 0 && numRows > 0)
 {
     import std.algorithm : min;
+    /// Alias for Matrix element type.
     alias ElementType = T;
     /// Number of elements in each row, same as the number of columns.
     enum rowSize = numColumns;
@@ -318,6 +319,7 @@ if (numColumns > 0 && numRows > 0)
     }
 }
 
+/// True if `T` is some kind of Matrix
 enum isMatrix(T) = is(T : Matrix!U, U...);
 
 /// Transpose a square matrix inplace.

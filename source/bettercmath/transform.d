@@ -1,3 +1,6 @@
+/**
+ * Type and dimension generic Affine Transformations backed by possibly compacted Matrices.
+ */
 module bettercmath.transform;
 
 /// Options for the Transform template.
@@ -61,14 +64,14 @@ if (Dim > 0)
     private alias FT = FloatType!T;
 
     /// Cast between Transform types of any dimension.
-    U opCast(U : Transform!(T, D, O), uint D, TransformOptions O)() const
+    U opCast(U : Transform!(T, Args), Args...)() const
     {
         typeof(return) result;
         return copyInto(result);
     }
 
     /// Copy Transform contents into `target` transform of any dimension and options.
-    auto ref copyInto(uint D, TransformOptions O)(ref return Transform!(T, D, O) target) const
+    auto ref copyInto(Args...)(ref return Transform!(T, Args) target) const
     {
         copyInto(target.matrix);
         return target;

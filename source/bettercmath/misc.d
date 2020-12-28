@@ -1,3 +1,6 @@
+/**
+ * Miscelaneous math functions and definitions.
+ */
 module bettercmath.misc;
 
 import std.math : PI;
@@ -22,14 +25,14 @@ FloatType!T degreesToRadians(T)(const T degrees)
 {
     return degrees * (PI / 180.0);
 }
-alias deg2rad = degreesToRadians;
+alias deg2rad = degreesToRadians;  /// ditto
 
 /// Convert angle from radias to degrees.
 FloatType!T radiansToDegrees(T)(const T radians)
 {
     return radians * (180.0 / PI);
 }
-alias rad2deg = radiansToDegrees;
+alias rad2deg = radiansToDegrees;  /// ditto
 
 /// Linearly interpolates values `from` and `to` by `amount`.
 T lerp(T, U)(const T from, const T to, const U amount)
