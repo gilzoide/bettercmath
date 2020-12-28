@@ -8,10 +8,12 @@
 - `Transform.copyInto` function that copies a Transform into a Transform-like
   Matrix type (NxN or NxN-1)
 - `Transform.opCast` function to cast between Transform types
+- `EasingFunction` alias to easing functions' type
 
 ### Changed
 - Added `auto ref` to several Matrix and Vector functions' arguments
 - Changed `Vector.opCast` to accept `T2[N]` instead of `Vector!(T2, N)`
+- Forced easing functions return types to `T`
 
 ### Removed
 - Transform template compact parameter, in favor of `TransformOptions`
