@@ -12,6 +12,6 @@ or [wrap](https://mesonbuild.com/Wrap-dependency-system-manual.html).
 - **hexagrid2d**: 2D Hexagon grid math based on <https://www.redblobgames.com/grids/hexagons>
 - **matrix**: Type generic Matrices for use in linear algebra
 - **misc**: Miscelaneous math functions (angle measure transformation, type generic linear interpolation)
-- **transform**: Type and dimension generic Affine transformations backed by possibly compacted Matrices
+- **transform**: Type and dimension generic Affine Transformations backed by possibly compacted Matrices
 - **valuerange**: Inclusive scalar value ranges for interpolating and remapping between ranges
-- **vector**: Fixed dimension vectors/points for use in linear algebra
+- **vector**: Type and dimension generic vectors/points for use in linear algebra
