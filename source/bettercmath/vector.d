@@ -61,33 +61,38 @@ pure:
     alias u = x;  /// ditto
     alias s = x;  /// ditto
 
-    static if (N > 1)
+    static if (N >= 2)
     {
         /// Get a reference to second element.
         alias y = _get!(1);
         alias g = y;  /// ditto
         alias v = y;  /// ditto
         alias t = y;  /// ditto
-    }
-    static if (N > 2)
-    {
-        /// Get a reference to third element.
-        alias z = _get!(2);
-        alias b = z;  /// ditto
-        alias p = z;  /// ditto
 
         /// Get a reference to the first and second elements.
         alias xy = _slice!(0, 2);
         alias rg = xy;  /// ditto
         alias uv = xy;  /// ditto
         alias st = xy;  /// ditto
+    }
+    static if (N >= 3)
+    {
+        /// Get a reference to third element.
+        alias z = _get!(2);
+        alias b = z;  /// ditto
+        alias p = z;  /// ditto
 
         /// Get a reference to the second and third elements.
         alias yz = _slice!(1, 3);
         alias gb = yz;  /// ditto
         alias tp = yz;  /// ditto
+
+        /// Get a reference to the first, second and third elements.
+        alias xyz = _slice!(0, 3);
+        alias rgb = xyz;  /// ditto
+        alias stp = xyz;  /// ditto
     }
-    static if (N > 3)
+    static if (N >= 4)
     {
         /// Get a reference to fourth element.
         alias w = _get!(3);
@@ -99,15 +104,15 @@ pure:
         alias ba = zw;  /// ditto
         alias pq = zw;  /// ditto
 
-        /// Get a reference to the first, second and third elements.
-        alias xyz = _slice!(0, 3);
-        alias rgb = xyz;  /// ditto
-        alias stp = xyz;  /// ditto
-
         /// Get a reference to the second, third and fourth elements.
         alias yzw = _slice!(1, 4);
         alias gba = yzw;  /// ditto
         alias tpq = yzw;  /// ditto
+
+        /// Get a reference to the first, second, third and fourth elements.
+        alias xyzw = _slice!(0, 4);
+        alias rgba = xyzw;  /// ditto
+        alias stpq = xyzw;  /// ditto
     }
 
     unittest
