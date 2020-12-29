@@ -14,3 +14,7 @@ bettercmath-test-*
 *.obj
 *.lst
 libbettercmath.*
+
+# adrdox stuff
+skeleton.html
+generated-docs/

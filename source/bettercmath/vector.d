@@ -9,6 +9,7 @@ import std.traits : isFloatingPoint;
 
 import bettercmath.cmath;
 import bettercmath.misc : FloatType;
+/// `lerp` function for UFCS
 public import bettercmath.misc : lerp;
 
 @safe @nogc nothrow:
@@ -20,6 +21,7 @@ version (unittest)
     private alias Vec2i = Vector!(int, 2);
     private alias Vec3 = Vector!(float, 3);
     private alias Vec4 = Vector!(float, 4);
+    private alias Vec4bool = Vector!(bool, 4);
 }
 
 
@@ -56,62 +58,85 @@ if (N > 0)
 
     /// Get a reference to first element.
     alias x = _get!(0);
-    alias r = x;  /// ditto
-    alias u = x;  /// ditto
-    alias s = x;  /// ditto
+    /// Ditto
+    alias r = x;
+    /// Ditto
+    alias u = x;
+    /// Ditto
+    alias s = x;
 
     static if (N >= 2)
     {
         /// Get a reference to second element.
         alias y = _get!(1);
-        alias g = y;  /// ditto
-        alias v = y;  /// ditto
-        alias t = y;  /// ditto
+        /// Ditto
+        alias g = y;
+        /// Ditto
+        alias v = y;
+        /// Ditto
+        alias t = y;
 
         /// Get a reference to the first and second elements.
         alias xy = _slice!(0, 2);
-        alias rg = xy;  /// ditto
-        alias uv = xy;  /// ditto
-        alias st = xy;  /// ditto
+        /// Ditto
+        alias rg = xy;
+        /// Ditto
+        alias uv = xy;
+        /// Ditto
+        alias st = xy;
     }
     static if (N >= 3)
     {
         /// Get a reference to third element.
         alias z = _get!(2);
-        alias b = z;  /// ditto
-        alias p = z;  /// ditto
+        /// Ditto
+        alias b = z;
+        /// Ditto
+        alias p = z;
 
         /// Get a reference to the second and third elements.
         alias yz = _slice!(1, 3);
-        alias gb = yz;  /// ditto
-        alias tp = yz;  /// ditto
+        /// Ditto
+        alias gb = yz;
+        /// Ditto
+        alias tp = yz;
 
         /// Get a reference to the first, second and third elements.
         alias xyz = _slice!(0, 3);
-        alias rgb = xyz;  /// ditto
-        alias stp = xyz;  /// ditto
+        /// Ditto
+        alias rgb = xyz;
+        /// Ditto
+        alias stp = xyz;
     }
     static if (N >= 4)
     {
         /// Get a reference to fourth element.
         alias w = _get!(3);
-        alias a = w;  /// ditto
-        alias q = w;  /// ditto
+        /// Ditto
+        alias a = w;
+        /// Ditto
+        alias q = w;
 
         /// Get a reference to the third and fourth elements.
         alias zw = _slice!(2, 4);
-        alias ba = zw;  /// ditto
-        alias pq = zw;  /// ditto
+        /// Ditto
+        alias ba = zw;
+        /// Ditto
+        alias pq = zw;
 
         /// Get a reference to the second, third and fourth elements.
         alias yzw = _slice!(1, 4);
-        alias gba = yzw;  /// ditto
-        alias tpq = yzw;  /// ditto
+        /// Ditto
+        alias gba = yzw;
+        /// Ditto
+        alias tpq = yzw;
 
         /// Get a reference to the first, second, third and fourth elements.
         alias xyzw = _slice!(0, 4);
-        alias rgba = xyzw;  /// ditto
-        alias stpq = xyzw;  /// ditto
+        /// Ditto
+        alias rgba = xyzw;
+        /// Ditto
+        alias stpq = xyzw;
     }
 
     unittest
@@ -137,37 +162,58 @@ if (N > 0)
     {
         elements[] = scalar;
     }
+    ///
     unittest
     {
+        alias Vec2 = Vector!(float, 2);
         Vec2 v;
         v = Vec2(1);
-        v = Vec2(1.0);
-        v = Vec2(1.0f);
+        assert(v == [1, 1]);
+        v = Vec2(2.0);
+        assert(v == [2, 2]);
+        v = Vec2(3.0f);
+        assert(v == [3, 3]);
     }
     /// Constructs a Vector from static array.
     this()(const auto ref T[N] values) pure
     {
         elements = values;
     }
+    ///
     unittest
     {
+        alias Vec2 = Vector!(float, 2);
         Vec2 v;
         v = Vec2([1, 2]);
-        v = Vec2([1.0, 2.0]);
-        v = Vec2([1.0f, 2.0f]);
+        assert(v == [1f, 2f]);
+        v = Vec2([2.0, 3.0]);
+        assert(v == [2f, 3f]);
+        v = Vec2([3.0f, 4.0f]);
+        assert(v == [3f, 4f]);
     }
-    /// Constructs a Vector with elements from an Input Range
+    /// Constructs a Vector with elements from an Input Range.
+    /// Values not provided by `range` are initialized to 0,
+    /// while additional values are ignored.
     this(R)(auto ref R range)
     if (isInputRange!R)
     {
-        auto remainder = range.copy(elements[]);
+        auto remainder = range.take(N).copy(elements[]);
         remainder[] = 0;
     }
+    ///
     unittest
     {
+        float[] values = [1, 2];
+        assert(Vec4(values) == [1, 2, 0, 0]);
+
+        import std.range : iota, stride;
         assert(Vec4(iota(4)) == [0, 1, 2, 3]);
         assert(Vec4(iota(8).stride(2)) == [0, 2, 4, 6]);
-        assert(Vec4(iota(3)) == [0, 1, 2, 0]);
+        assert(Vec4(iota(6)) == [0, 1, 2, 3]);
+
+        import std.algorithm : map;
+        auto isEven = iota(1024).map!(x => x % 2 == 0);
+        assert(Vec4bool(isEven) == [true, false, true, false]);
     }
     /// Constructs a Vector with all elements initialized separetely
     this(Args...)(const auto ref Args args)
@@ -175,14 +221,14 @@ if (N > 0)
     {
         this(only(args));
     }
+    ///
     unittest
     {
-        Vec2 v;
-        v = Vec2(1, 2);
-        v = Vec2(1, 2.0);
-        v = Vec2(1.0, 2);
-        v = Vec2(1.0, 2.0);
-        v = Vec2(1.0f, 2.0f);
+        Vec3 v;
+        v = Vec3(1, 2);
+        assert(v == [1, 2, 0]);
+        v = Vec3(1, 2, 3);
+        assert(v == [1, 2, 3]);
     }
 
 pure:
@@ -200,6 +246,7 @@ pure:
         mixin(q{result =} ~ op ~ q{elements[];});
         return result;
     }
+    ///
     unittest
     {
         assert(-Vec2(1, -2) == [-1, 2]);
@@ -213,6 +260,7 @@ pure:
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
         return result;
     }
+    ///
     unittest
     {
         Vec2 a = [1, 2];
@@ -230,7 +278,7 @@ pure:
     }
     // TODO: shift operations
 
-    /// Ditto
+    /// Returns a new vector with binary operator applied to all elements and `scalar`
     Vector opBinaryRight(string op)(const T scalar) const
     if (!op.among("~", "<<", ">>", ">>>"))
     {
@@ -238,6 +286,7 @@ pure:
         mixin(q{result = scalar} ~ op ~ q{elements[];});
         return result;
     }
+    ///
     unittest
     {
         Vec2 a = [1, 2];
@@ -272,6 +321,7 @@ pure:
         }
         return result;
     }
+    ///
     unittest
     {
         assert(Vec2(1, 2) + Vec2(3, 4) == [1f+3f, 2f+4f]);
@@ -299,6 +349,7 @@ pure:
         result[N] = scalar;
         return result;
     }
+    ///
     unittest
     {
         Vec2 v = [1, 2];
@@ -312,6 +363,7 @@ pure:
         result[1 .. N + 1] = elements[];
         return result;
     }
+    ///
     unittest
     {
         Vec2 v = [1, 2];
@@ -325,6 +377,7 @@ pure:
         typeof(return) result = elements ~ other;
         return result;
     }
+    ///
     unittest
     {
         Vec2 v1 = [1, 2];
@@ -337,6 +390,7 @@ pure:
         typeof(return) result = other ~ elements;
         return result;
     }
+    ///
     unittest
     {
         Vec2 v1 = [1, 2];
@@ -354,36 +408,52 @@ pure:
         }
         return result;
     }
+    ///
     unittest
     {
         Vec2i intVec = [1, 2];
         auto floatVec = cast(Vec2) intVec;
         assert(floatVec == Vec2(1f, 2f));
-        assert(cast(Vec2i) floatVec == intVec);
+        assert(floatVec == intVec);
 
         auto floatArray = cast(float[2]) intVec;
         assert(floatArray == [1f, 2f]);
+        assert(floatArray == intVec);
     }
 
     /// Assign result of applying operator with `scalar` to elements.
     ref Vector opOpAssign(string op)(const T scalar) return
+    if (!op.among("~", "<<", ">>", ">>>"))
     {
         mixin(q{elements[] } ~ op ~ q{= scalar;});
         return this;
     }
+    ///
     unittest
     {
-        Vec2 v = [1, 2];
+        Vec2i v = [1, 2];
         v += 5;
         assert(v == [6, 7]);
+        v -= 4;
+        assert(v == [2, 3]);
+        v *= -1;
+        assert(v == [-2, -3]);
+        v %= 3;
+        assert(v == [-2, 0]);
+        v |= 1;
+        assert(v == [-1, 1]);
+        v /= 2;
+        assert(v == [0, 0]); // integer division
     }
     /// Assign result of applying operator with `other` to elements.
     ref Vector opOpAssign(string op, uint M)(const auto ref T[M] other) return
+    if (!op.among("~", "<<", ">>", ">>>"))
     {
         enum minDimension = min(N, M);
         mixin(q{elements[0 .. minDimension] } ~ op ~ q{= other[0 .. minDimension];});
         return this;
     }
+    ///
     unittest
     {
         Vec3 v = [1, 2, 3];
@@ -417,6 +487,7 @@ Vector!(T, N) vector(T, uint N)(const auto ref T[N] elements)
 {
     return typeof(return)(elements);
 }
+///
 unittest
 {
     auto v = [1, 2, 3].vector;
@@ -455,6 +526,7 @@ do
 {
     return dot(vec, vec);
 }
+///
 unittest
 {
     assert(Vec2(0, 0).magnitudeSquared() == 0);
@@ -472,6 +544,7 @@ do
 {
     return sqrt(vec.magnitudeSquared());
 }
+///
 unittest
 {
     assert(Vec2(0, 0).magnitude() == 0);
@@ -493,6 +566,7 @@ ref Vector!(T, N) normalize(T, uint N)(ref return Vector!(T, N) vec)
     }
     return vec;
 }
+///
 unittest
 {
     Vec2 v = [5, 0];
@@ -506,6 +580,7 @@ Vector!(T, N) normalized(T, uint N)(const auto ref Vector!(T, N) vec)
     typeof(return) copy = vec;
     return copy.normalize();
 }
+///
 unittest
 {
     Vec2 v = [200, 0];
