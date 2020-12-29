@@ -425,14 +425,14 @@ unittest
 }
 
 /// Returns the dot product between two Vectors.
-pure T dot(T, uint N)(const auto ref Vector!(T, N) a, const auto ref Vector!(T, N) b)
+T dot(T, uint N)(const auto ref Vector!(T, N) a, const auto ref Vector!(T, N) b) pure
 {
     auto multiplied = a * b;
     return multiplied[].sum;
 }
 
 /// Returns the cross product between two 3D Vectors.
-pure Vector!(T, 3) cross(T)(const auto ref Vector!(T, 3) a, const auto ref Vector!(T, 3) b)
+Vector!(T, 3) cross(T)(const auto ref Vector!(T, 3) a, const auto ref Vector!(T, 3) b) pure
 {
     typeof(return) result = [
         a.y * b.z - a.z * b.y,
@@ -443,13 +443,13 @@ pure Vector!(T, 3) cross(T)(const auto ref Vector!(T, 3) a, const auto ref Vecto
 }
 
 /// Returns a Vector that is the reflection of `vec` against `normal`.
-pure Vector!(T, N) reflect(T, uint N)(const auto ref Vector!(T, N) vec, const auto ref Vector!(T, N) normal)
+Vector!(T, N) reflect(T, uint N)(const auto ref Vector!(T, N) vec, const auto ref Vector!(T, N) normal) pure
 {
     return vec - (2 * normal * dot(vec, normal));
 }
 
 /// Returns the squared magnitude (Euclidean length) of a Vector.
-pure T magnitudeSquared(T, uint N)(const auto ref Vector!(T, N) vec)
+T magnitudeSquared(T, uint N)(const auto ref Vector!(T, N) vec) pure
 out (r) { assert(r >= 0, "Vector squared magnitude should be non-negative!"); }
 do
 {

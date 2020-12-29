@@ -1,4 +1,9 @@
 ## [Unreleased]
+### Fixed
+- Purity of Vector constructor with Range argument
+
+### Removed
+- `vector.map` function, use `std.range.map` instead
 
 
 ## [0.2.0] - 2020-12-28
