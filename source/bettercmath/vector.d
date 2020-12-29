@@ -33,7 +33,6 @@ version (unittest)
 struct Vector(T, uint N)
 if (N > 0)
 {
-pure:
     /// Alias for Vector element type.
     alias ElementType = T;
     /// Vector dimension.
@@ -42,13 +41,13 @@ pure:
     T[N] elements = 0;
     alias elements this;
 
-    private ref inout(T) _get(size_t i)() inout
+    private ref inout(T) _get(size_t i)() inout pure
     in { assert(i < N, "Index out of bounds"); }
     do
     {
         return elements[i];
     }
-    private ref inout(T[to - from]) _slice(size_t from, size_t to)() inout
+    private ref inout(T[to - from]) _slice(size_t from, size_t to)() inout pure
     in { assert(from <= N - 1 && to <= N, "Index out of bounds"); }
     do
     {
@@ -134,7 +133,7 @@ pure:
     }
 
     /// Constructs a Vector with all elements equal to `scalar`
-    this(const T scalar)
+    this(const T scalar) pure
     {
         elements[] = scalar;
     }
@@ -146,7 +145,7 @@ pure:
         v = Vec2(1.0f);
     }
     /// Constructs a Vector from static array.
-    this()(const auto ref T[N] values)
+    this()(const auto ref T[N] values) pure
     {
         elements = values;
     }
@@ -186,6 +185,7 @@ pure:
         v = Vec2(1.0f, 2.0f);
     }
 
+pure:
     /// Vector with all zeros
     enum Vector zeros = 0;
     alias zeroes = zeros;
@@ -320,7 +320,7 @@ pure:
     }
 
     /// Returns a new vector of greater dimension by copying elements and appending values from `other`.
-    Vector!(T, N + M) opBinary(string op : "~", M)(const auto ref T[M] other) const
+    Vector!(T, N + M) opBinary(string op : "~", uint M)(const auto ref T[M] other) const
     {
         typeof(return) result = elements ~ other;
         return result;
@@ -332,7 +332,7 @@ pure:
         assert(v1 ~ Vec2(3f, 4f) == Vec4(1, 2, 3, 4));
     }
     /// Returns a new vector of greater dimension by copying elements and prepending values from `other`.
-    Vector!(T, N + M) opBinaryRight(string op : "~", M)(const auto ref T[M] other) const
+    Vector!(T, N + M) opBinaryRight(string op : "~", uint M)(const auto ref T[M] other) const
     {
         typeof(return) result = other ~ elements;
         return result;
@@ -479,24 +479,6 @@ unittest
     assert(Vec2(0, 1).magnitude() == 1);
     assert(Vec2(1, 1).magnitude() == sqrt(2f));
     assert(Vec2(2, 0).magnitude() == 2);
-}
-
-Vector!(typeof(mapfunc(cast(T) 0)), N) map(alias mapfunc, T, uint N)(const auto ref Vector!(T, N) vec)
-{
-    typeof(return) result;
-    foreach (i; 0 .. N)
-    {
-        result[i] = mapfunc(vec[i]);
-    }
-    return result;
-}
-unittest
-{
-    Vec3 v = [-1, 2.5, -3];
-    import std.math : abs, floor;
-    assert(v.map!(abs) == Vec3(1, 2.5, 3));
-    assert(v.map!(floor) == Vec3(-1, 2, -3));
-    assert(v.map!(x => x + 1) == Vec3(-1 + 1, 2.5 + 1, -3 + 1));
 }
 
 /// Normalize a Vector inplace.

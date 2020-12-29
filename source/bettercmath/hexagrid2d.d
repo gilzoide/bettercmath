@@ -185,9 +185,10 @@ pure:
 Hex!(int) rounded(FT)(const Hex!(FT) hex)
 if (isFloatingPoint!FT)
 {
+    import std.algorithm : map;
     alias Vec3 = Vector!(FT, 3);
     Vec3 cubic_hex = hex.coordinates ~ hex.s;
-    Vec3 roundedVec = cubic_hex.map!(round);
+    Vec3 roundedVec = cubic_hex[].map!(round);
     Vec3 diff = roundedVec - cubic_hex;
 
     if (diff[0] > diff[1] && diff[0] > diff[2])
