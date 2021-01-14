@@ -3,7 +3,7 @@
  */
 module bettercmath.box;
 
-@safe @nogc nothrow:
+@safe @nogc nothrow pure:
 
 /// Options for the BoundingBox template.
 enum BoundingBoxOptions
