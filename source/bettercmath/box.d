@@ -8,9 +8,9 @@ module bettercmath.box;
 /// Options for the BoundingBox template.
 enum BoundingBoxOptions
 {
-    /// Default options: store `max` corner information and derive `size`.
+    /// Default options: store `end` corner information and derive `size`.
     none = 0,
-    /// Store `size` information and derive `max` corner.
+    /// Store `size` information and derive `end` corner.
     storeSize = 1,
 }
 
@@ -38,48 +38,68 @@ if (Dim > 0)
     /// Size type, a Vector with the same type and dimension.
     alias Size = Vector!(T, Dim);
 
-    /// Minimum Box corner.
-    Point min = 0;
+    /// Starting BoundingBox corner.
+    Point start = 0;
 
     static if (options & BoundingBoxOptions.storeSize)
     {
-        /// Size of a Box, may be negative.
+        /// Size of a BoundingBox, may be negative.
         Size size = 1;
 
-        /// Get the `max` corner of a Box.
-        @property Point max() const
+        /// Get the `end` corner of a BoundingBox.
+        @property Point end() const
         {
-            return min + size;
+            return start + size;
         }
-        /// Set the `max` corner of a Box.
-        @property void max(const Point value)
+        /// Set the `end` corner of a BoundingBox.
+        @property void end(const Point value)
         {
-            size = value - min;
+            size = value - start;
+        }
+
+        /// Cast BoundingBox to another storage type.
+        auto opCast(U : BoundingBox!(T, Dim, options ^ BoundingBoxOptions.storeSize))() const
+        {
+            typeof(return) box = {
+                start = this.start,
+                end = this.end,
+            };
+            return box;
         }
     }
     else
     {
-        /// Maximum Box corner.
-        Point max = 1;
+        /// Ending BoundingBox corner.
+        Point end = 1;
 
-        /// Get the size of a Box, may be negative.
+        /// Get the size of a BoundingBox, may be negative.
         @property Size size() const
         {
-            return max - min;
+            return end - start;
         }
-        /// Set the size of a Box, using `min` as the pivot.
+        /// Set the size of a BoundingBox, using `start` as the pivot.
         @property void size(const Size value)
         {
-            max = min + value;
+            end = start + value;
+        }
+
+        /// Cast BoundingBox to another storage type.
+        auto opCast(U : BoundingBox!(T, Dim, options ^ BoundingBoxOptions.storeSize))() const
+        {
+            typeof(return) box = {
+                start = this.start,
+                size = this.size,
+            };
+            return box;
         }
     }
 
-    /// Get the width of a Box, may be negative.
+    /// Get the width of a BoundingBox, may be negative.
     @property T width() const
     {
         return size.width;
     }
-    /// Set the width of a Box, using `min` as the pivot.
+    /// Set the width of a BoundingBox, using `start` as the pivot.
     @property void width(const T value)
     {
         auto s = size;
@@ -89,12 +109,12 @@ if (Dim > 0)
 
     static if (Dim >= 2)
     {
-        /// Get the height of a Box, may be negative.
+        /// Get the height of a BoundingBox, may be negative.
         @property T height() const
         {
             return size.height;
         }
-        /// Set the height of a Box, using `min` as the pivot.
+        /// Set the height of a BoundingBox, using `start` as the pivot.
         @property void height(const T value)
         {
             auto s = size;
@@ -104,12 +124,12 @@ if (Dim > 0)
     }
     static if (Dim >= 3)
     {
-        /// Get the depth of a Box, may be negative.
+        /// Get the depth of a BoundingBox, may be negative.
         @property T depth() const
         {
             return size.depth;
         }
-        /// Set the depth of a Box, using `min` as the pivot.
+        /// Set the depth of a BoundingBox, using `start` as the pivot.
         @property void depth(const T value)
         {
             auto s = size;
@@ -118,13 +138,35 @@ if (Dim > 0)
         }
     }
 
-    /// Get the central point of Box.
+    /// Get the central point of BoundingBox.
     @property Point center() const
     {
-        return (min + max) / 2;
+        return (start + end) / 2;
     }
 
-    /// Get the volume of the Box.
+    /// Returns whether BoundingBox have any non-positive size values.
+    @property bool empty() const
+    {
+        import std.algorithm : any;
+        return size[].any!"a <= 0";
+    }
+
+    /// Returns a copy of BoundingBox with sorted corners, so that `size` only presents non-negative values.
+    BoundingBox abs() const
+    {
+        import std.algorithm : swap;
+        typeof(return) result = this;
+        foreach (i; 0 .. result.dimension)
+        {
+            if (result.start[i] < result.end[i])
+            {
+                swap(result.start[i], result.end[i]);
+            }
+        }
+        return result;
+    }
+
+    /// Get the volume of the BoundingBox.
     @property T volume() const
     {
         import std.algorithm : fold;
@@ -139,12 +181,45 @@ if (Dim > 0)
 
     static if (Dim == 3)
     {
-        /// Get the surface area of a 3D Box.
+        /// Get the surface area of a 3D BoundingBox.
         @property T surfaceArea() const
         {
             auto s = size;
             return 2 * (s.x * s.y + s.y * s.z + s.x * s.z);
         }
+    }
+
+    /// Returns true if Point is contained within BoundingBox.
+    bool contains(T, uint N)(const auto ref T[N] point) const
+    {
+        import std.algorithm : all, map, min;
+        import std.range : iota;
+        enum minDimension = min(this.dimension, N);
+        return iota(minDimension).map!(i => point[i] >= start[i] && point[i] <= end[i]).all;
+    }
+
+    /// Returns true if `box` is completely contained within `this` BoundingBox.
+    bool contains(Args...)(const auto ref BoundingBox!(T, Args) box) const
+    {
+        return contains(box.start) && contains(box.end);
+    }
+
+    /// Returns the intersection between two BoundingBoxes.
+    auto intersection(Args...)(const auto ref BoundingBox!(T, Args) box) const
+    {
+        import std.algorithm : map, min, max;
+        import std.range : iota, zip;
+        enum minDimension = min(this.dimension, box.dimension);
+        BoundingBox!(T, minDimension, options) result;
+        result.start = zip(this.start[0 .. minDimension], box.start[0 .. minDimension]).map!(max);
+        result.end = zip(this.end[0 .. minDimension], box.end[0 .. minDimension]).map!(min);
+        return result;
+    }
+
+    /// Returns true if `box` intersects `this`.
+    auto intersects(Args...)(const auto ref BoundingBox!(T, Args) box) const
+    {
+        return !intersection(box).empty;
     }
 }
 
