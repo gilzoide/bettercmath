@@ -1,5 +1,6 @@
 module bettercmath;
 
+public import bettercmath.box;
 public import bettercmath.cmath;
 public import bettercmath.easings;
 public import bettercmath.hexagrid2d;

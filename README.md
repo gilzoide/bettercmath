@@ -8,6 +8,7 @@ or [wrap](https://mesonbuild.com/Wrap-dependency-system-manual.html).
 
 ## Submodules
 
+- **box**: Type and dimension generic Axis-Aligned Bounding Boxes
 - **cmath**: Standard math type generic functions and constants, using D runtime ([std.math](https://dlang.org/phobos/std_math.html))
   on [CTFE](https://tour.dlang.org/tour/en/gems/compile-time-function-evaluation-ctfe)
   and C runtime ([core.stdc.math](https://dlang.org/phobos/core_stdc_math.html)) otherwise

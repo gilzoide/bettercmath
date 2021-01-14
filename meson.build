@@ -1,6 +1,7 @@
 project('bettercmath', 'd')
 
 sources = files(
+  'source/bettercmath/box.d',
   'source/bettercmath/cmath.d',
   'source/bettercmath/easings.d',
   'source/bettercmath/hexagrid2d.d',

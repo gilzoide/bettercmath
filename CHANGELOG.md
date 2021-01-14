@@ -1,4 +1,9 @@
 ## [Unreleased]
+### Added
+- **box** submodule, with type and dimension generic axis-aligned bounding box template
+- `width`, `height` and `depth` aliases for `Vector` elements
+- `vector` overload that receive elements and infers element type using `std.traits.CommonType`
+
 ### Fixed
 - Purity of Vector constructor with Range argument
 

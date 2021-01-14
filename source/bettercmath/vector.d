@@ -64,6 +64,8 @@ if (N > 0)
     alias u = x;
     /// Ditto
     alias s = x;
+    /// Ditto
+    alias width = x;
 
     static if (N >= 2)
     {
@@ -75,6 +77,8 @@ if (N > 0)
         alias v = y;
         /// Ditto
         alias t = y;
+        /// Ditto
+        alias height = y;
 
         /// Get a reference to the first and second elements.
         alias xy = _slice!(0, 2);
@@ -93,6 +97,8 @@ if (N > 0)
         alias b = z;
         /// Ditto
         alias p = z;
+        /// Ditto
+        alias depth = z;
 
         /// Get a reference to the second and third elements.
         alias yz = _slice!(1, 3);
