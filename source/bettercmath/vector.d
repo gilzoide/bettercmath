@@ -5,7 +5,7 @@ module bettercmath.vector;
 
 import std.algorithm : among, copy, max, min, sum;
 import std.range;
-import std.traits : isFloatingPoint;
+import std.traits : CommonType;
 
 import bettercmath.cmath;
 import bettercmath.misc : FloatType;
@@ -493,6 +493,20 @@ unittest
     auto v = [1, 2, 3].vector;
     assert(v.elements == [1, 2, 3]);
     assert(is(typeof(v) == Vector!(int, 3)));
+}
+
+/// Construct Vector directly from elements, inferring element type.
+Vector!(CommonType!Args, Args.length) vector(Args...)(const auto ref Args args)
+if (!is(CommonType!Args == void))
+{
+    return typeof(return)(args);
+}
+///
+unittest
+{
+    auto v = vector(1f, 2, 3);
+    assert(is(typeof(v) == Vector!(float, 3)));
+    assert(v == [1f, 2f, 3f]);
 }
 
 /// Returns the dot product between two Vectors.

@@ -192,6 +192,7 @@ if (numColumns > 0 && numRows > 0)
         }
         return result;
     }
+    ///
     unittest
     {
         auto m1 = Mat23.fromRows(1, 2,
@@ -223,6 +224,7 @@ if (numColumns > 0 && numRows > 0)
         }
         return result;
     }
+    ///
     unittest
     {
         alias Mat23 = Matrix!(int, 2, 3);
@@ -335,6 +337,7 @@ ref Matrix!(T, C, C) transpose(T, uint C)(ref return Matrix!(T, C, C) mat)
     }
     return mat;
 }
+///
 unittest
 {
     auto m1 = Mat2.fromRows(1, 2,
@@ -357,6 +360,7 @@ Matrix!(T, R, C) transposed(T, uint C, uint R)(const auto ref Matrix!(T, C, R) m
     }
     return newMat;
 }
+///
 unittest
 {
     float[6] elements = [1, 2, 3, 4, 5, 6];
