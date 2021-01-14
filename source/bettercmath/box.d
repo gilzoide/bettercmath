@@ -117,6 +117,35 @@ if (Dim > 0)
             size = s;
         }
     }
+
+    /// Get the central point of Box.
+    @property Point center() const
+    {
+        return (min + max) / 2;
+    }
+
+    /// Get the volume of the Box.
+    @property T volume() const
+    {
+        import std.algorithm : fold;
+        return size.fold!"a * b";
+    }
+
+    static if (Dim == 2)
+    {
+        /// 2D area is the same as generic box volume.
+        alias area = volume;
+    }
+
+    static if (Dim == 3)
+    {
+        /// Get the surface area of a 3D Box.
+        @property T surfaceArea() const
+        {
+            auto s = size;
+            return 2 * (s.x * s.y + s.y * s.z + s.x * s.z);
+        }
+    }
 }
 
 /// Common alias for Bounding Boxes.
