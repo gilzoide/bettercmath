@@ -13,9 +13,7 @@ sources = files(
 )
 incdir = include_directories('source')
 
-bettercmath = library('bettercmath',
-  sources,
+bettercmath_dep = declare_dependency(
+  sources: sources,
   include_directories: incdir,
 )
-
-bettercmath_dep = declare_dependency(include_directories: incdir, link_with: bettercmath)
