@@ -1,8 +1,14 @@
 ## [Unreleased]
+
+## [0.3.0] - 2021-01-15
 ### Added
 - **box** submodule, with type and dimension generic axis-aligned bounding box template
 - `width`, `height` and `depth` aliases for `Vector` elements
 - `vector` overload that receive elements and infers element type using `std.traits.CommonType`
+
+### Changed
+- Changed target type to source library in `dub.json` and `meson.build`,
+  as all package functionality is within templates
 
 ### Fixed
 - Purity of Vector constructor with Range argument
@@ -55,6 +61,7 @@
   value interpolation and remapping
 - **vector** submodule, with type and dimension generic vector math
 
-[Unreleased]: https://github.com/gilzoide/bettercmath/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/gilzoide/bettercmath/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/gilzoide/bettercmath/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/gilzoide/bettercmath/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/gilzoide/bettercmath/releases/tag/v0.1.0
