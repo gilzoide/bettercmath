@@ -19,6 +19,7 @@ version (unittest)
     private alias Vec1 = Vector!(float, 1);
     private alias Vec2 = Vector!(float, 2);
     private alias Vec2i = Vector!(int, 2);
+    private alias Vec2ub = Vector!(ubyte, 2);
     private alias Vec3 = Vector!(float, 3);
     private alias Vec4 = Vector!(float, 4);
     private alias Vec4bool = Vector!(bool, 4);
@@ -225,7 +226,14 @@ if (N > 0)
     this(Args...)(const auto ref Args args)
     if (args.length <= N)
     {
-        this(only(args));
+        foreach (i, value; args)
+        {
+            elements[i] = cast(T) value;
+        }
+        static if (Args.length < N)
+        {
+            elements[Args.length .. N] = 0;
+        }
     }
     ///
     unittest
@@ -266,6 +274,18 @@ pure:
         mixin(q{result = elements[]} ~ op ~ q{scalar;});
         return result;
     }
+    /// Ditto
+    auto opBinary(string op, U)(const U scalar) const
+    if (!is(U : T) && !is(CommonType!(U, T) == void) && !op.among("~", "<<", ">>", ">>>"))
+    {
+        mixin(q{alias resultType = typeof(cast(T)(1) } ~ op ~ q{ cast(U)(1));});
+        Vector!(CommonType!(T, U), N) result;
+        foreach (i; 0 .. N)
+        {
+            result[i] = mixin(q{elements[i] } ~ op ~ q{ scalar});
+        }
+        return result;
+    }
     ///
     unittest
     {
@@ -290,6 +310,18 @@ pure:
     {
         Vector result;
         mixin(q{result = scalar} ~ op ~ q{elements[];});
+        return result;
+    }
+    /// Ditto
+    auto opBinaryRight(string op, U)(const U scalar) const
+    if (!is(U : T) && !is(CommonType!(U, T) == void) && !op.among("~", "<<", ">>", ">>>"))
+    {
+        mixin(q{alias resultType = typeof(cast(U)(1) } ~ op ~ q{ cast(T)(1));});
+        Vector!(CommonType!(T, U), N) result;
+        foreach (i; 0 .. N)
+        {
+            result[i] = mixin(q{scalar } ~ op ~ q{ elements[i]});
+        }
         return result;
     }
     ///
@@ -327,6 +359,26 @@ pure:
         }
         return result;
     }
+    /// Ditto
+    Vector!(CommonType!(U, T), max(N, M)) opBinary(string op, U, uint M)(const auto ref U[M] other) const
+    if (!is(CommonType!(U, T) == void) && op != "~")
+    {
+        enum minDimension = min(N, M);
+        typeof(return) result;
+        foreach (i; 0 .. minDimension)
+        {
+            mixin(q{result[i] = elements[i] } ~ op ~ q{ other[i];});
+        }
+        static if (M < N)
+        {
+            result[minDimension .. N] = elements[minDimension .. N];
+        }
+        else static if (N < M)
+        {
+            result[minDimension .. M] = other[minDimension .. M];
+        }
+        return result;
+    }
     ///
     unittest
     {
@@ -345,6 +397,8 @@ pure:
         assert(Vec2(1, 2) - Vec3(3, 4, 5) == [1f-3f, 2f-4f, 5f]);
         assert(Vec2(1, 2) * Vec3(3, 4, 5) == [1f*3f, 2f*4f, 5f]);
         assert(Vec2(1, 2) / Vec3(3, 4, 5) == [1f/3f, 2f/4f, 5f]);
+
+        assert(Vec2i(1, 2) + Vec2(3, 4) == [1+3f, 2+4f]);
     }
 
     /// Returns a new vector of greater dimension by copying elements and appending `scalar`.
@@ -615,4 +669,10 @@ unittest
     assert(lerp(a, b, 0) == a);
     assert(lerp(a, b, 0.5) == Vec2(1.5, 2));
     assert(lerp(a, b, 1) == b);
+
+    Vec2ub c1 = [0, 0];
+    Vec2ub c2 = [255, 255];
+    assert(lerp(c1, c2, 0) == c1);
+    assert(lerp(c1, c2, 1) == c2);
+    assert(lerp(c1, c2, 0.5) == Vec2ub(127, 127));
 }
