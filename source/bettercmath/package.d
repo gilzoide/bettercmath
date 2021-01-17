@@ -8,3 +8,4 @@ public import bettercmath.matrix;
 public import bettercmath.misc;
 public import bettercmath.transform;
 public import bettercmath.vector;
+public import bettercmath.valuerange;
