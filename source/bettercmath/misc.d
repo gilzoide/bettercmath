@@ -37,7 +37,8 @@ alias rad2deg = radiansToDegrees;  /// ditto
 /// Linearly interpolates values `from` and `to` by `amount`.
 T lerp(T, U)(const T from, const T to, const U amount)
 {
-    return cast(T) (from + amount * (to - from));
+    enum U one = 1;
+    return cast(T) (amount * to + (one - amount) * from);
 }
 /// Linearly interpolates the values from `fromTo` by `amount`.
 T lerp(T, U)(const T[2] fromTo, const U amount)
