@@ -44,13 +44,13 @@ if (N > 0)
     T[N] elements = 0;
     alias elements this;
 
-    private ref inout(T) _get(size_t i)() inout pure
+    ref inout(T) _get(size_t i)() inout pure
     in { assert(i < N, "Index out of bounds"); }
     do
     {
         return elements[i];
     }
-    private ref inout(T[to - from]) _slice(size_t from, size_t to)() inout pure
+    ref inout(T[to - from]) _slice(size_t from, size_t to)() inout pure
     in { assert(from <= N - 1 && to <= N, "Index out of bounds"); }
     do
     {

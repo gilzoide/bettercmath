@@ -1,4 +1,11 @@
 ## [Unreleased]
+### Added
+- `Vector.opBinary` and `Vector.opBinaryRight` versions that accepts non-T arguments
+
+### Fixed
+- Import valuerange in package.d
+- Avoid overflow/underflow in `lerp`
+- Make `Vector._get` and `Vector._slice` public
 
 ## [0.3.0] - 2021-01-15
 ### Added
