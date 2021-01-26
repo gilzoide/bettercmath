@@ -5,6 +5,11 @@ module bettercmath.box;
 
 @safe @nogc nothrow pure:
 
+version (unittest)
+{
+    alias Rectangle = BoundingBox!(float, 2, BoundingBoxOptions.storeSize);
+}
+
 /// Options for the BoundingBox template.
 enum BoundingBoxOptions
 {
@@ -38,10 +43,12 @@ if (Dim > 0)
     /// Size type, a Vector with the same type and dimension.
     alias Size = Vector!(T, Dim);
 
-    /// Starting BoundingBox corner.
-    Point start = 0;
+    private enum storeSize = options & BoundingBoxOptions.storeSize;
 
-    static if (options & BoundingBoxOptions.storeSize)
+    /// Starting BoundingBox corner.
+    Point origin = 0;
+
+    static if (storeSize)
     {
         /// Size of a BoundingBox, may be negative.
         Size size = 1;
@@ -49,19 +56,19 @@ if (Dim > 0)
         /// Get the `end` corner of a BoundingBox.
         @property Point end() const
         {
-            return start + size;
+            return origin + size;
         }
         /// Set the `end` corner of a BoundingBox.
         @property void end(const Point value)
         {
-            size = value - start;
+            size = value - origin;
         }
 
         /// Cast BoundingBox to another storage type.
         auto opCast(U : BoundingBox!(T, Dim, options ^ BoundingBoxOptions.storeSize))() const
         {
             typeof(return) box = {
-                start = this.start,
+                origin = this.origin,
                 end = this.end,
             };
             return box;
@@ -75,19 +82,19 @@ if (Dim > 0)
         /// Get the size of a BoundingBox, may be negative.
         @property Size size() const
         {
-            return end - start;
+            return end - origin;
         }
-        /// Set the size of a BoundingBox, using `start` as the pivot.
+        /// Set the size of a BoundingBox, using `origin` as the pivot.
         @property void size(const Size value)
         {
-            end = start + value;
+            end = origin + value;
         }
 
         /// Cast BoundingBox to another storage type.
         auto opCast(U : BoundingBox!(T, Dim, options ^ BoundingBoxOptions.storeSize))() const
         {
             typeof(return) box = {
-                start = this.start,
+                origin = this.origin,
                 size = this.size,
             };
             return box;
@@ -99,7 +106,7 @@ if (Dim > 0)
     {
         return size.width;
     }
-    /// Set the width of a BoundingBox, using `start` as the pivot.
+    /// Set the width of a BoundingBox, using `origin` as the pivot.
     @property void width(const T value)
     {
         auto s = size;
@@ -114,7 +121,7 @@ if (Dim > 0)
         {
             return size.height;
         }
-        /// Set the height of a BoundingBox, using `start` as the pivot.
+        /// Set the height of a BoundingBox, using `origin` as the pivot.
         @property void height(const T value)
         {
             auto s = size;
@@ -129,7 +136,7 @@ if (Dim > 0)
         {
             return size.depth;
         }
-        /// Set the depth of a BoundingBox, using `start` as the pivot.
+        /// Set the depth of a BoundingBox, using `origin` as the pivot.
         @property void depth(const T value)
         {
             auto s = size;
@@ -141,7 +148,29 @@ if (Dim > 0)
     /// Get the central point of BoundingBox.
     @property Point center() const
     {
-        return (start + end) / 2;
+        return (origin + end) / 2;
+    }
+    /// Set the central point of BoundingBox.
+    @property void center(const Point value)
+    {
+        immutable delta = value - center;
+        origin += delta;
+        static if (!storeSize)
+        {
+            end += delta;
+        }
+    }
+    /// Ditto
+    @property void center(const T value)
+    {
+        center(Point(value));
+    }
+    ///
+    unittest
+    {
+        Rectangle rect;
+        rect.center = 2;
+        assert(rect.size == Rectangle.init.size);
     }
 
     /// Returns whether BoundingBox have any non-positive size values.
@@ -158,9 +187,9 @@ if (Dim > 0)
         typeof(return) result = this;
         foreach (i; 0 .. result.dimension)
         {
-            if (result.start[i] < result.end[i])
+            if (result.origin[i] < result.end[i])
             {
-                swap(result.start[i], result.end[i]);
+                swap(result.origin[i], result.end[i]);
             }
         }
         return result;
@@ -189,19 +218,29 @@ if (Dim > 0)
         }
     }
 
+    /// Returns a new BoundingBox by insetting this one by `delta`.
+    BoundingBox inset(const Size delta)
+    {
+        immutable halfDelta = delta / 2;
+        typeof(return) box;
+        box.origin = this.origin + halfDelta;
+        box.size = this.size - halfDelta;
+        return box;
+    }
+
     /// Returns true if Point is contained within BoundingBox.
     bool contains(T, uint N)(const auto ref T[N] point) const
     {
         import std.algorithm : all, map, min;
         import std.range : iota;
         enum minDimension = min(this.dimension, N);
-        return iota(minDimension).map!(i => point[i] >= start[i] && point[i] <= end[i]).all;
+        return iota(minDimension).map!(i => point[i] >= origin[i] && point[i] <= end[i]).all;
     }
 
     /// Returns true if `box` is completely contained within `this` BoundingBox.
     bool contains(Args...)(const auto ref BoundingBox!(T, Args) box) const
     {
-        return contains(box.start) && contains(box.end);
+        return contains(box.origin) && contains(box.end);
     }
 
     /// Returns the intersection between two BoundingBoxes.
@@ -211,7 +250,7 @@ if (Dim > 0)
         import std.range : iota, zip;
         enum minDimension = min(this.dimension, box.dimension);
         BoundingBox!(T, minDimension, options) result;
-        result.start = zip(this.start[0 .. minDimension], box.start[0 .. minDimension]).map!(max);
+        result.origin = zip(this.origin[0 .. minDimension], box.origin[0 .. minDimension]).map!(max);
         result.end = zip(this.end[0 .. minDimension], box.end[0 .. minDimension]).map!(min);
         return result;
     }

@@ -1,4 +1,9 @@
 ## [Unreleased]
+### Added
+- Setter functions for `BoundingBox.center` property
+
+### Changed
+- Renamed `BoundingBox.start` to `BoundingBox.origin`
 
 ## [0.3.1] - 2021-01-25
 ### Added
