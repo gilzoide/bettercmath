@@ -1,9 +1,15 @@
 ## [Unreleased]
 ### Added
 - Setter functions for `BoundingBox.center` property
+- `Vector.opBinaryRight` with static arrays
 
 ### Changed
 - Renamed `BoundingBox.start` to `BoundingBox.origin`
+
+### Fixed
+- Variadic `Vector` constructor to be called only if more
+  than one argument is passed
+
 
 ## [0.3.1] - 2021-01-25
 ### Added

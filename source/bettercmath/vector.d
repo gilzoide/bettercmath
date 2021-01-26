@@ -222,9 +222,9 @@ if (N > 0)
         auto isEven = iota(1024).map!(x => x % 2 == 0);
         assert(Vec4bool(isEven) == [true, false, true, false]);
     }
-    /// Constructs a Vector with all elements initialized separetely
+    /// Constructs a Vector with all elements initialized separately
     this(Args...)(const auto ref Args args)
-    if (args.length <= N)
+    if (args.length > 1 && args.length <= N)
     {
         foreach (i, value; args)
         {
@@ -399,6 +399,28 @@ pure:
         assert(Vec2(1, 2) / Vec3(3, 4, 5) == [1f/3f, 2f/4f, 5f]);
 
         assert(Vec2i(1, 2) + Vec2(3, 4) == [1+3f, 2+4f]);
+    }
+
+    /// Returns a new vector with the results of applying operator against elements of `other`.
+    /// If operands dimensions are unequal, copies the values from greater dimension vector.
+    Vector!(CommonType!(U, T), max(N, M)) opBinaryRight(string op, U, uint M)(const auto ref U[M] other) const
+    if (!is(CommonType!(U, T) == void) && op != "~")
+    {
+        enum minDimension = min(N, M);
+        typeof(return) result;
+        foreach (i; 0 .. minDimension)
+        {
+            mixin(q{result[i] = other[i] } ~ op ~ q{ elements[i];});
+        }
+        static if (M < N)
+        {
+            result[minDimension .. N] = elements[minDimension .. N];
+        }
+        else static if (N < M)
+        {
+            result[minDimension .. M] = other[minDimension .. M];
+        }
+        return result;
     }
 
     /// Returns a new vector of greater dimension by copying elements and appending `scalar`.
