@@ -40,8 +40,10 @@ if (Dim > 0)
     enum dimension = Dim;
     /// Point type, a Vector with the same type and dimension.
     alias Point = Vector!(T, Dim);
+    private alias PointArg = T[Dim];
     /// Size type, a Vector with the same type and dimension.
     alias Size = Vector!(T, Dim);
+    private alias SizeArg = T[Dim];
 
     private enum storeSize = options & BoundingBoxOptions.storeSize;
 
@@ -59,7 +61,7 @@ if (Dim > 0)
             return origin + size;
         }
         /// Set the `end` corner of a BoundingBox.
-        @property void end(const Point value)
+        @property void end(const PointArg value)
         {
             size = value - origin;
         }
@@ -85,7 +87,7 @@ if (Dim > 0)
             return end - origin;
         }
         /// Set the size of a BoundingBox, using `origin` as the pivot.
-        @property void size(const Size value)
+        @property void size(const SizeArg value)
         {
             end = origin + value;
         }
@@ -151,7 +153,7 @@ if (Dim > 0)
         return (origin + end) / 2;
     }
     /// Set the central point of BoundingBox.
-    @property void center(const Point value)
+    @property void center(const PointArg value)
     {
         immutable delta = value - center;
         origin += delta;
@@ -170,6 +172,8 @@ if (Dim > 0)
     {
         Rectangle rect;
         rect.center = 2;
+        assert(rect.size == Rectangle.init.size);
+        rect.center = [1, 2];
         assert(rect.size == Rectangle.init.size);
     }
 
@@ -219,13 +223,18 @@ if (Dim > 0)
     }
 
     /// Returns a new BoundingBox by insetting this one by `delta`.
-    BoundingBox inset(const Size delta)
+    BoundingBox inset(const SizeArg delta)
     {
-        immutable halfDelta = delta / 2;
+        immutable halfDelta = Size(delta) / 2;
         typeof(return) box;
         box.origin = this.origin + halfDelta;
         box.size = this.size - halfDelta;
         return box;
+    }
+    /// Ditto
+    BoundingBox inset(const T delta)
+    {
+        return inset(Size(delta));
     }
 
     /// Returns true if Point is contained within BoundingBox.

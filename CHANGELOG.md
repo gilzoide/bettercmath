@@ -5,6 +5,7 @@
 
 ### Changed
 - Renamed `BoundingBox.start` to `BoundingBox.origin`
+- Added support for static arrays as arguments in `BoundingBox`
 
 ### Fixed
 - Variadic `Vector` constructor to be called only if more
