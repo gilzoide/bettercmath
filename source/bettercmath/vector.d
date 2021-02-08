@@ -4,8 +4,9 @@
 module bettercmath.vector;
 
 import std.algorithm : among, copy, max, min, sum;
+import std.meta;
 import std.range;
-import std.traits : CommonType;
+import std.traits;
 
 import bettercmath.cmath;
 import bettercmath.misc : FloatType;
@@ -23,6 +24,27 @@ version (unittest)
     private alias Vec3 = Vector!(float, 3);
     private alias Vec4 = Vector!(float, 4);
     private alias Vec4bool = Vector!(bool, 4);
+    private struct OtherVec2
+    {
+        float x;
+        float y;
+    }
+    private struct NotAVec2
+    {
+        float i;
+        string t;
+    }
+}
+
+private template VectorStruct(U)
+if (is(U == struct))
+{
+    private alias FieldTypes = Fields!U;
+    alias ElementType = FieldTypes[0];
+    private enum isElementType(T) = is(T == ElementType);
+    enum isVectorStruct = allSatisfy!(isElementType, FieldTypes);
+    enum fieldNames = FieldNameTuple!U;
+    enum length = fieldNames.length;
 }
 
 
@@ -221,6 +243,29 @@ if (N > 0)
         import std.algorithm : map;
         auto isEven = iota(1024).map!(x => x % 2 == 0);
         assert(Vec4bool(isEven) == [true, false, true, false]);
+    }
+    /// Constructs a Vector from a Vector-like struct.
+    this(U)(const auto ref U value)
+    if (is(U == struct) && VectorStruct!U.isVectorStruct)
+    {
+        alias vectorStruct = VectorStruct!U;
+        static foreach (i; 0 .. min(vectorStruct.length, N))
+        {
+            elements[i] = cast(T) mixin("value." ~ vectorStruct.fieldNames[i]);
+        }
+        static if (vectorStruct.length < N)
+        {
+            elements[vectorStruct.length .. N] = 0;
+        }
+    }
+    ///
+    unittest
+    {
+        Vec2 v = OtherVec2(2, 3);
+        assert(v == Vec2(2, 3));
+        Vec4 v4 = OtherVec2(4, 5);
+        assert(v4 == Vec4(4, 5, 0, 0));
+        assert(!__traits(compiles, { Vec2 v = NotAVec2(); }));
     }
     /// Constructs a Vector with all elements initialized separately
     this(Args...)(const auto ref Args args)
@@ -501,6 +546,27 @@ pure:
         auto floatArray = cast(float[2]) intVec;
         assert(floatArray == [1f, 2f]);
         assert(floatArray == intVec);
+    }
+
+    /// Cast to a Vector-like struct.
+    U opCast(U)() const
+    if (is(U == struct) && VectorStruct!U.isVectorStruct)
+    {
+        alias vectorStruct = VectorStruct!U;
+        typeof(return) result;
+        static foreach (i; 0 .. min(vectorStruct.length, N))
+        {
+            mixin("result." ~ vectorStruct.fieldNames[i]) = cast(vectorStruct.ElementType) elements[i];
+        }
+        return result;
+    }
+    ///
+    unittest
+    {
+        immutable Vec2 five = 5;
+        OtherVec2 otherFive = cast(OtherVec2) five;
+        assert(otherFive == OtherVec2(5, 5));
+        assert(!__traits(compiles, { auto v = cast(NotAVec2) five; }));
     }
 
     /// Assign result of applying operator with `scalar` to elements.

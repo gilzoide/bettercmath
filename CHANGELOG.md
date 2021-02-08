@@ -2,6 +2,10 @@
 ### Added
 - Setter functions for `BoundingBox.center` property
 - `Vector.opBinaryRight` with static arrays
+- `Vector` constructor from a Vector-like struct, that is, one
+  with all fields of same type
+- `Vector.opCast` for a Vector-like struct type, that is, one
+  with all fields of same type
 
 ### Changed
 - Renamed `BoundingBox.start` to `BoundingBox.origin`
