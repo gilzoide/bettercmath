@@ -6,6 +6,7 @@ has [online documentation](https://bettercmath.dpldocs.info/)
 and may be used directly as a [Meson subproject](https://mesonbuild.com/Subprojects.html)
 or [wrap](https://mesonbuild.com/Wrap-dependency-system-manual.html).
 
+
 ## Submodules
 
 - **box**: Type and dimension generic Axis-Aligned Bounding Boxes
@@ -19,3 +20,9 @@ or [wrap](https://mesonbuild.com/Wrap-dependency-system-manual.html).
 - **transform**: Type and dimension generic Affine Transformations backed by possibly compacted Matrices
 - **valuerange**: Inclusive scalar value ranges for interpolating and remapping between ranges
 - **vector**: Type and dimension generic Vector type for use in linear algebra
+
+
+## TODO
+- Support row-major matrices
+- Color submodule
+- Gradient submodule
